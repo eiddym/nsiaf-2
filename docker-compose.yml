@@ -1,0 +1,95 @@
+services:
+  nsiaf_db:
+    image: postgres:16-alpine
+    container_name: nsiaf-v2-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nsiaf_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nsiaf_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-nsiaf_db}
+    ports:
+      - "${DB_PORT:-5436}:5432"
+    volumes:
+      - nsiaf_pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nsiaf_admin} -d ${POSTGRES_DB:-nsiaf_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nsiaf_network
+
+  nsiaf_redis:
+    image: redis:7-alpine
+    container_name: nsiaf-v2-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - nsiaf_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nsiaf_network
+
+  nsiaf_gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: nsiaf-v2-gotenberg
+    restart: unless-stopped
+    ports:
+      - "${GOTENBERG_PORT:-3004}:3000"
+    networks:
+      - nsiaf_network
+
+  nsiaf_api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: nsiaf-v2-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nsiaf_admin}:${POSTGRES_PASSWORD:-nsiaf_secure_password}@nsiaf_db:5432/${POSTGRES_DB:-nsiaf_db}?schema=public
+      REDIS_HOST: nsiaf_redis
+      REDIS_PORT: 6379
+      GOTENBERG_URL: http://nsiaf_gotenberg:3000
+      JWT_SECRET: ${JWT_SECRET:-nsiaf_super_secret_jwt_key_2026_change_in_production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+    ports:
+      - "${API_PORT:-3002}:3002"
+    depends_on:
+      nsiaf_db:
+        condition: service_healthy
+      nsiaf_redis:
+        condition: service_healthy
+    networks:
+      - nsiaf_network
+
+  nsiaf_web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: nsiaf-v2-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8086}:80"
+    depends_on:
+      - nsiaf_api
+    networks:
+      - nsiaf_network
+
+volumes:
+  nsiaf_pgdata:
+    name: nsiaf_v2_pgdata
+  nsiaf_redisdata:
+    name: nsiaf_v2_redisdata
+
+networks:
+  nsiaf_network:
+    name: nsiaf_v2_network
+    driver: bridge
