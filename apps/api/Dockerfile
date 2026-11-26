@@ -40,4 +40,4 @@ COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 
 EXPOSE 3002
 
-CMD ["sh", "-c", "pnpm --filter api prisma:generate && node apps/api/dist/main.js"]
+CMD ["sh", "-c", "pnpm --filter api exec prisma db push --skip-generate && pnpm --filter api prisma:seed && node apps/api/dist/main.js"]

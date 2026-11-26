@@ -57,9 +57,27 @@ cp .env.example .env
 # 2. Dependencias
 pnpm install
 
-# 3. Levantar el stack completo
+## Despliegue Rápido (1 solo comando)
+
+El sistema está configurado para inicializarse completamente desde cero con un único comando: la base de datos se crea, las tablas y relaciones se sincronizan automáticamente y los datos base (usuarios administradores, responsables de activos/almacenes, funcionarios, cuentas contables y configuración inicial) se siembran de forma desatendida.
+
+```bash
+git clone https://github.com/eiddym/nsiaf-2.git
+cd nsiaf-2
 docker compose up -d --build
 ```
+
+No requiere crear archivos `.env` manuales ni ejecutar comandos `docker exec` adicionales a menos que desee personalizar puertos o credenciales en el archivo `docker-compose.yml`.
+
+### Credenciales de acceso por defecto (Despliegue inicial)
+
+| Rol / Acceso | Usuario | Contraseña | Perfil y Alcance |
+|--------------|---------|------------|-------------------|
+| **Super Administrador** | `admin` | `admin123` | Control total del sistema y configuración inicial |
+| **Administrador General** | `admin_general` | `activos123` | Visión consolidada (Activos Fijos + Almacenes) |
+| **Responsable de Activos** | `admin_activos` | `activos123` | Solo Módulo de Activos Fijos y Bienes de Uso |
+| **Responsable de Almacenes** | `admin_almacenes` | `activos123` | Solo Módulo de Almacenes, Suministros y Kardex |
+| **Funcionario / Solicitante** | `jflores` | `funcionario123` | Portal de Autoservicio (Custodia, pedidos SMS y activos) |
 
 También disponible:
 

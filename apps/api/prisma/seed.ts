@@ -77,6 +77,8 @@ async function main() {
       cargo: 'Administrador General del Sistema',
       telefono: '22112233',
       rol: RolUsuario.SUPER_ADMIN,
+      accesoActivos: true,
+      accesoAlmacenes: true,
       unidadId: unidadTIC.id,
     },
   });
@@ -95,7 +97,51 @@ async function main() {
       cargo: 'Responsable de Activos Fijos',
       telefono: '71928374',
       rol: RolUsuario.ADMIN_ACTIVOS,
+      accesoActivos: true,
+      accesoAlmacenes: false,
       unidadId: unidadUAF.id,
+    },
+  });
+
+  const respAlmacenes = await prisma.usuario.upsert({
+    where: { username: 'admin_almacenes' },
+    update: {},
+    create: {
+      ci: '9900112',
+      username: 'admin_almacenes',
+      passwordHash: respActivosPasswordHash,
+      nombres: 'Ramiro',
+      apellidos: 'Condori Huanca',
+      email: 'almacenes@cooperativa.bo',
+      cargo: 'Encargado de Almacenes',
+      telefono: '71002233',
+      rol: RolUsuario.ADMIN_ALMACENES,
+      accesoActivos: false,
+      accesoAlmacenes: true,
+      unidadId: unidadUAF.id,
+      esJefe: true,
+      jerarquia: 'JEFE',
+    },
+  });
+
+  const adminGeneral = await prisma.usuario.upsert({
+    where: { username: 'admin_general' },
+    update: {},
+    create: {
+      ci: '9900113',
+      username: 'admin_general',
+      passwordHash: respActivosPasswordHash,
+      nombres: 'Eduardo',
+      apellidos: 'Vargas Miranda',
+      email: 'administracion@cooperativa.bo',
+      cargo: 'Administrador General',
+      telefono: '71004455',
+      rol: RolUsuario.ADMIN_GENERAL,
+      accesoActivos: true,
+      accesoAlmacenes: true,
+      unidadId: unidadDir.id,
+      esJefe: true,
+      jerarquia: 'MAE',
     },
   });
 
@@ -113,7 +159,28 @@ async function main() {
       cargo: 'Especialista en Infraestructura y Redes',
       telefono: '76543210',
       rol: RolUsuario.FUNCIONARIO,
+      accesoActivos: false,
+      accesoAlmacenes: false,
       unidadId: unidadTIC.id,
+    },
+  });
+
+  // Configuración Inicial del Sistema
+  await prisma.configuracionSistema.upsert({
+    where: { id: 'global' },
+    update: {},
+    create: {
+      id: 'global',
+      nombreEntidad: 'Cooperativa de Telecomunicaciones y Servicios',
+      siglaEntidad: 'COOP',
+      regimenNormativo: 'PUBLICO',
+      modalidadAdministracion: 'DESCENTRALIZADA',
+      exigirCite: true,
+      responsableActivosId: respActivos.id,
+      responsableAlmacenesId: respAlmacenes.id,
+      ssoAuthentikHabilitado: true,
+      authentikIssuerUrl: 'https://auth.marabuntarl.com/application/o/intranet/',
+      authentikLdapUrl: 'ldap://localhost:389',
     },
   });
 
