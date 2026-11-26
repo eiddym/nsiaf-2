@@ -14,7 +14,10 @@ datasource db {
 enum RolUsuario {
   SUPER_ADMIN
   ADMIN_ACTIVOS
+  AUXILIAR_ACTIVOS
   ADMIN_ALMACENES
+  AUXILIAR_ALMACENES
+  ADMIN_GENERAL
   OBSERVADOR
   FUNCIONARIO
 }
@@ -33,6 +36,7 @@ enum TipoActa {
 
 enum TipoIngreso {
   COMPRA
+  REINGRESO
   DONACION
   TRASPASO
   SALDO_INICIAL
@@ -46,9 +50,18 @@ enum EstadoSolicitud {
   ANULADA
 }
 
+enum EstadoTraspaso {
+  PENDIENTE
+  EN_TRANSITO
+  RECIBIDO
+  ANULADO
+}
+
 enum TipoMovimientoKardex {
   ENTRADA
   SALIDA
+  TRASPASO_SALIDA
+  TRASPASO_ENTRADA
   AJUSTE_POSITIVO
   AJUSTE_NEGATIVO
 }
@@ -79,6 +92,7 @@ model Edificio {
   entidadId String     @map("entidad_id")
   entidad   Entidad    @relation(fields: [entidadId], references: [id])
   unidades  Unidad[]
+  almacenes Almacen[]
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
@@ -86,14 +100,21 @@ model Edificio {
 }
 
 model Unidad {
-  id         String     @id @default(uuid())
-  codigo     Int        @unique
-  nombre     String     @db.VarChar(250)
-  edificioId String     @map("edificio_id")
-  edificio   Edificio   @relation(fields: [edificioId], references: [id])
-  usuarios   Usuario[]
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
+  id            String     @id @default(uuid())
+  codigo        Int        @unique
+  nombre        String     @db.VarChar(250)
+  sigla         String?    @db.VarChar(50)
+  edificioId    String     @map("edificio_id")
+  edificio      Edificio   @relation(fields: [edificioId], references: [id])
+  
+  // Jerarquía Unidad y Subunidad
+  unidadPadreId String?    @map("unidad_padre_id")
+  unidadPadre   Unidad?    @relation("Subunidades", fields: [unidadPadreId], references: [id])
+  subunidades   Unidad[]   @relation("Subunidades")
+
+  usuarios      Usuario[]
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
 
   @@map("unidades")
 }
@@ -109,19 +130,28 @@ model Usuario {
   email           String?       @db.VarChar(150)
   telefono        String?       @db.VarChar(50)
   rol             RolUsuario    @default(FUNCIONARIO)
+  accesoActivos   Boolean       @default(false) @map("acceso_activos")
+  accesoAlmacenes Boolean       @default(false) @map("acceso_almacenes")
   activo          Boolean       @default(true)
   unidadId        String?       @map("unidad_id")
   unidad          Unidad?       @relation(fields: [unidadId], references: [id])
+  
+  // Jerarquía y Cargo
+  jerarquia       String?       @default("OPERADOR") @db.VarChar(50) // JEFE | OPERADOR | MAE | TECNICO
+  esJefe          Boolean       @default(false) @map("es_jefe")
   
   // Relaciones
   activosCustodia Activo[]      @relation("CustodioActivo")
   actasFuncionario Acta[]       @relation("ActaFuncionario")
   actasResponsable Acta[]       @relation("ActaResponsable")
   solicitudesAlmacen SolicitudAlmacen[]
+  solicitudesActivos SolicitudActivo[]
   ingresosRegistrados IngresoAlmacen[]
   ingresosActivosRegistrados IngresoActivo[]
   bajasRegistradas BajaActivo[]
   cierresGestion  Gestion[]     @relation("CierreGestionUsuario")
+  almacenesACargo Almacen[]     @relation("ResponsableAlmacen")
+  traspasosCreados TraspasoAlmacen[] @relation("TraspasoCreadoPor")
 
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
@@ -237,6 +267,7 @@ model IngresoActivo {
   fechaC31              DateTime?   @map("fecha_c31") @db.Date
   notaEntregaNumero     String?     @map("nota_entrega_numero") @db.VarChar(50)
   documentoCite         String?     @map("documento_cite") @db.VarChar(100) // Integración Plantillas
+  entidadDonante        String?     @map("entidad_donante") @db.VarChar(255)
   total                 Decimal     @default(0.0) @db.Decimal(18, 4)
   observacion           String?     @db.VarChar(500)
   creadoPorId           String      @map("creado_por_id")
@@ -289,6 +320,7 @@ model Activo {
   actasDetalle          ActaDetalle[]
   cierresGestion        CierreActivo[]
   seguros               ActivoSeguro[]
+  solicitudes           SolicitudActivo[]
 
   createdAt             DateTime       @default(now()) @map("created_at")
   updatedAt             DateTime       @updatedAt @map("updated_at")
@@ -367,8 +399,91 @@ model ActivoSeguro {
 }
 
 // ==========================================
-// SUBSISTEMA: ALMACENES
+// SUBSISTEMA: ALMACENES (CENTRAL Y SUB-ALMACENES SUCURSALES)
 // ==========================================
+
+model Almacen {
+  id              String            @id @default(uuid())
+  codigo          String            @unique @db.VarChar(50) // Ej: ALM-CENTRAL, SUB-ALTO, SUC-CBB
+  nombre          String            @db.VarChar(250)
+  direccion       String?           @db.VarChar(255)
+  esCentral       Boolean           @default(false) @map("es_central")
+  
+  // Jerarquía: El almacén central asigna a los sub-almacenes dependientes
+  almacenPadreId  String?           @map("almacen_padre_id")
+  almacenPadre    Almacen?          @relation("JerarquiaAlmacenes", fields: [almacenPadreId], references: [id])
+  subalmacenes    Almacen[]         @relation("JerarquiaAlmacenes")
+
+  // Ubicación física y responsable
+  edificioId      String?           @map("edificio_id")
+  edificio        Edificio?         @relation(fields: [edificioId], references: [id])
+  responsableId   String?           @map("responsable_id")
+  responsable     Usuario?          @relation("ResponsableAlmacen", fields: [responsableId], references: [id])
+  activo          Boolean           @default(true)
+
+  // Inventarios, movimientos y traspasos
+  stocks          StockAlmacen[]
+  ingresos        IngresoAlmacen[]
+  solicitudes     SolicitudAlmacen[]
+  kardex          KardexAlmacen[]
+  traspasosOrigen TraspasoAlmacen[] @relation("TraspasoOrigen")
+  traspasosDestino TraspasoAlmacen[] @relation("TraspasoDestino")
+
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  @@map("almacenes")
+}
+
+model StockAlmacen {
+  id               String      @id @default(uuid())
+  almacenId        String      @map("almacen_id")
+  almacen          Almacen     @relation(fields: [almacenId], references: [id], onDelete: Cascade)
+  subarticuloId    String      @map("subarticulo_id")
+  subarticulo      Subarticulo @relation(fields: [subarticuloId], references: [id])
+  stockActual      Decimal     @default(0.0) @map("stock_actual") @db.Decimal(14, 4)
+  costoPromedio    Decimal     @default(0.0) @map("costo_promedio") @db.Decimal(18, 4)
+  stockMinimo      Decimal     @default(5.0) @map("stock_minimo") @db.Decimal(14, 4)
+  ubicacionEstante String?     @map("ubicacion_estante") @db.VarChar(100)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  @@unique([almacenId, subarticuloId])
+  @@map("stocks_almacen")
+}
+
+model TraspasoAlmacen {
+  id               String                   @id @default(uuid())
+  numero           Int                      @default(autoincrement())
+  fecha            DateTime                 @default(now())
+  almacenOrigenId  String                   @map("almacen_origen_id")
+  almacenOrigen    Almacen                  @relation("TraspasoOrigen", fields: [almacenOrigenId], references: [id])
+  almacenDestinoId String                   @map("almacen_destino_id")
+  almacenDestino   Almacen                  @relation("TraspasoDestino", fields: [almacenDestinoId], references: [id])
+  documentoCite    String?                  @map("documento_cite") @db.VarChar(100)
+  motivo           String?                  @db.Text
+  estado           EstadoTraspaso           @default(RECIBIDO)
+  creadoPorId      String                   @map("creado_por_id")
+  creadoPor        Usuario                  @relation("TraspasoCreadoPor", fields: [creadoPorId], references: [id])
+  detalles         DetalleTraspasoAlmacen[]
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+
+  @@map("traspasos_almacen")
+}
+
+model DetalleTraspasoAlmacen {
+  id            String          @id @default(uuid())
+  traspasoId    String          @map("traspaso_id")
+  traspaso      TraspasoAlmacen @relation(fields: [traspasoId], references: [id], onDelete: Cascade)
+  subarticuloId String          @map("subarticulo_id")
+  subarticulo   Subarticulo     @relation(fields: [subarticuloId], references: [id])
+  cantidad      Decimal         @db.Decimal(14, 4)
+  costoUnitario Decimal         @map("costo_unitario") @db.Decimal(18, 4)
+  costoTotal    Decimal         @map("costo_total") @db.Decimal(18, 4)
+
+  @@map("detalles_traspaso_almacen")
+}
 
 model Material {
   id           String        @id @default(uuid())
@@ -383,20 +498,22 @@ model Material {
 }
 
 model Subarticulo {
-  id                    String                  @id @default(uuid())
-  codigo                Int                     @unique
-  descripcion           String                  @db.VarChar(250)
-  unidadMedida          String                  @map("unidad_medida") @db.VarChar(50)
-  stockActual           Decimal                 @default(0.0) @map("stock_actual") @db.Decimal(14, 4)
-  costoUnitarioPromedio Decimal                 @default(0.0) @map("costo_unitario_promedio") @db.Decimal(18, 4)
-  materialId            String                  @map("material_id")
-  material              Material                @relation(fields: [materialId], references: [id])
-  activo                Boolean                 @default(true)
+  id                    String                   @id @default(uuid())
+  codigo                Int                      @unique
+  descripcion           String                   @db.VarChar(250)
+  unidadMedida          String                   @map("unidad_medida") @db.VarChar(50)
+  stockActual           Decimal                  @default(0.0) @map("stock_actual") @db.Decimal(14, 4)
+  costoUnitarioPromedio Decimal                  @default(0.0) @map("costo_unitario_promedio") @db.Decimal(18, 4)
+  materialId            String                   @map("material_id")
+  material              Material                 @relation(fields: [materialId], references: [id])
+  activo                Boolean                  @default(true)
+  stocks                StockAlmacen[]
   detallesIngreso       DetalleIngresoAlmacen[]
   detallesSolicitud     DetalleSolicitudAlmacen[]
+  detallesTraspaso      DetalleTraspasoAlmacen[]
   kardexMovimientos     KardexAlmacen[]
-  createdAt             DateTime                @default(now()) @map("created_at")
-  updatedAt             DateTime                @updatedAt @map("updated_at")
+  createdAt             DateTime                 @default(now()) @map("created_at")
+  updatedAt             DateTime                 @updatedAt @map("updated_at")
 
   @@map("subarticulos")
 }
@@ -406,6 +523,8 @@ model IngresoAlmacen {
   numero            Int                     @default(autoincrement())
   fecha             DateTime                @db.Date
   tipoIngreso       TipoIngreso             @default(COMPRA) @map("tipo_ingreso")
+  almacenId         String?                 @map("almacen_id")
+  almacen           Almacen?                @relation(fields: [almacenId], references: [id])
   proveedorId       String?                 @map("proveedor_id")
   proveedor         Proveedor?              @relation(fields: [proveedorId], references: [id])
   facturaNumero     String?                 @map("factura_numero") @db.VarChar(50)
@@ -413,6 +532,7 @@ model IngresoAlmacen {
   notaEntregaNumero String?                 @map("nota_entrega_numero") @db.VarChar(50)
   nroC31            String?                 @map("nro_c31") @db.VarChar(50)
   documentoCite     String?                 @map("documento_cite") @db.VarChar(100)
+  entidadDonante    String?                 @map("entidad_donante") @db.VarChar(255)
   subtotal          Decimal                 @default(0.0) @db.Decimal(18, 4)
   descuento         Decimal                 @default(0.0) @db.Decimal(18, 4)
   total             Decimal                 @default(0.0) @db.Decimal(18, 4)
@@ -435,7 +555,7 @@ model DetalleIngresoAlmacen {
   cantidad      Decimal        @db.Decimal(14, 4)
   costoUnitario Decimal        @map("costo_unitario") @db.Decimal(18, 4)
   costoTotal    Decimal        @map("costo_total") @db.Decimal(18, 4)
-  saldoLote     Decimal        @default(0.0) @map("saldo_lote") @db.Decimal(14, 4) // Para valuación PEPS
+  saldoLote     Decimal        @default(0.0) @map("saldo_lote") @db.Decimal(14, 4)
 
   @@map("detalles_ingreso_almacen")
 }
@@ -444,6 +564,8 @@ model SolicitudAlmacen {
   id             String                    @id @default(uuid())
   numero         Int                       @default(autoincrement())
   fecha          DateTime                  @default(now()) @db.Date
+  almacenId      String?                   @map("almacen_id")
+  almacen        Almacen?                  @relation(fields: [almacenId], references: [id])
   solicitanteId  String                    @map("solicitante_id")
   solicitante    Usuario                   @relation(fields: [solicitanteId], references: [id])
   estado         EstadoSolicitud           @default(PENDIENTE)
@@ -472,11 +594,13 @@ model DetalleSolicitudAlmacen {
 
 model KardexAlmacen {
   id               String               @id @default(uuid())
+  almacenId        String?              @map("almacen_id")
+  almacen          Almacen?             @relation(fields: [almacenId], references: [id])
   fecha            DateTime             @default(now())
   subarticuloId    String               @map("subarticulo_id")
   subarticulo      Subarticulo          @relation(fields: [subarticuloId], references: [id])
   tipoMovimiento   TipoMovimientoKardex @map("tipo_movimiento")
-  referenciaTipo   String               @map("referencia_tipo") @db.VarChar(50) // INGRESO, SOLICITUD, AJUSTE
+  referenciaTipo   String               @map("referencia_tipo") @db.VarChar(50)
   referenciaId     String?              @map("referencia_id") @db.VarChar(100)
   documentoCite    String?              @map("documento_cite") @db.VarChar(100)
   cantidad         Decimal              @db.Decimal(14, 4)
@@ -506,4 +630,51 @@ model Auditoria {
   fecha           DateTime @default(now())
 
   @@map("auditoria")
+}
+
+// ==========================================
+// PORTAL DEL SOLICITANTE / AUTOSERVICIO
+// ==========================================
+
+model SolicitudActivo {
+  id             String          @id @default(uuid())
+  numero         Int             @default(autoincrement())
+  fecha          DateTime        @default(now()) @db.Date
+  solicitanteId  String          @map("solicitante_id")
+  solicitante    Usuario         @relation(fields: [solicitanteId], references: [id])
+  tipo           String          @default("ASIGNACION") @db.VarChar(50) // ASIGNACION | DEVOLUCION
+  activoId       String?         @map("activo_id")
+  activo         Activo?         @relation(fields: [activoId], references: [id])
+  rubro          String?         @db.VarChar(150)
+  descripcion    String          @db.Text
+  justificacion  String?         @db.Text
+  estado         EstadoSolicitud @default(PENDIENTE)
+  documentoCite  String?         @map("documento_cite") @db.VarChar(100)
+  observacion    String?         @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  @@map("solicitudes_activos")
+}
+
+// ==========================================
+// CONFIGURACIÓN CENTRAL Y GOBERNANZA
+// ==========================================
+
+model ConfiguracionSistema {
+  id                      String   @id @default("global")
+  nombreEntidad           String   @default("Cooperativa / Entidad Institucional") @map("nombre_entidad") @db.VarChar(255)
+  siglaEntidad            String   @default("ENT") @map("sigla_entidad") @db.VarChar(50)
+  regimenNormativo        String   @default("PUBLICO") @map("regimen_normativo") @db.VarChar(20) // PUBLICO (D.S. 0181) | PRIVADO (NIIF)
+  modalidadAdministracion String   @default("DESCENTRALIZADA") @map("modalidad_administracion") @db.VarChar(30) // DESCENTRALIZADA | UNIFICADA
+  exigirCite              Boolean  @default(true) @map("exigir_cite")
+  responsableActivosId    String?  @map("responsable_activos_id")
+  responsableAlmacenesId  String?  @map("responsable_almacenes_id")
+  ssoAuthentikHabilitado  Boolean  @default(true) @map("sso_authentik_habilitado")
+  authentikIssuerUrl      String?  @default("https://auth.marabuntarl.com/application/o/intranet/") @map("authentik_issuer_url") @db.VarChar(255)
+  authentikClientId       String?  @map("authentik_client_id") @db.VarChar(255)
+  authentikLdapUrl        String?  @default("ldap://localhost:389") @map("authentik_ldap_url") @db.VarChar(255)
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  @@map("configuracion_sistema")
 }
