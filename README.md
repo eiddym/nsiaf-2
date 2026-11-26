@@ -103,11 +103,16 @@ Métodos de valoración soportados: **PEPS** y **Promedio Ponderado**.
 ## Estado actual
 
 - ✅ Monorepo y pipelines de build (Turborepo + pnpm) operativos.
-- ✅ Stack Docker completo (PostgreSQL, Redis, Gotenberg, API, Web) funcionando.
-- ✅ Esquema Prisma del dominio completo.
-- ✅ Módulos iniciales de **Activos Fijos** y **Almacenes** con Swagger.
-- ✅ Dashboard inicial en Angular 19.
-- 🚧 Próximos pasos: autenticación JWT, actas, bajas, seguros, kardex completo e integración con Plantillas.
+- ✅ Stack Docker completo (PostgreSQL 16, Redis 7, Gotenberg 8, API NestJS, Web Angular 19 + Nginx) funcionando.
+- ✅ Esquema Prisma del dominio completo y sincronizado.
+- ✅ Autenticación JWT y control de acceso RBAC con segregación estricta (`ADMIN_ACTIVOS`, `ADMIN_ALMACENES`, `ADMIN_GENERAL`, `FUNCIONARIO`, `AUXILIAR_ACTIVOS`, `AUXILIAR_ALMACENES`).
+- ✅ Integración SSO con Authentik institucional (LDAP Outpost y OIDC con auto-provisioning de funcionarios).
+- ✅ Dashboard de Control con segregación estricta de módulos, métricas de bienes activos, bajas, estados físicos, rubros contables, valor monetario de inventario en bodega y alertas de desabastecimiento.
+- ✅ Portal del Funcionario / Solicitante (`/portal-solicitante`): Consulta de custodia activa, solicitud de suministros (SMS), requerimiento de asignación o devolución de activos fijos e historial de trámites.
+- ✅ Configuración Central & Gobernanza (`/configuracion`): Modalidad descentralizada vs unificada, asignación de responsables y ayudantes/auxiliares (vehículos, maquinaria, estantería), régimen normativo (Público Ley 1178/D.S. 0181 vs Privado NIIF) y parámetros Authentik.
+- ✅ Módulos completos: Activos Fijos con QR Escáner, Almacenes con Kardex valorado, Entidades e Instituciones, Catálogo de Proveedores, Pólizas de Seguro y Cierres Anuales con UFV.
+- ✅ Emisión de reportes normados en PDF con códigos QR oficiales.
+- ✅ Interfaz 100% responsiva para dispositivos móviles y terminales de toma de inventario en campo.
 
 ## Origen
 
