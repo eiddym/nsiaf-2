@@ -537,7 +537,7 @@ import jsQR from 'jsqr';
                     id="activoCite"
                     type="text"
                     formControlName="documentoCite"
-                    placeholder="Ej: ADSIB-CITE-ACT-2026-015"
+                    placeholder="Ej: ENT-CITE-ACT-2026-015"
                   />
                 </div>
                 <div class="form-group">
@@ -671,7 +671,7 @@ import jsQR from 'jsqr';
               <div class="form-row">
                 <div class="form-group">
                   <label for="citeDoc">Documento CITE Oficial</label>
-                  <input id="citeDoc" type="text" formControlName="documentoCite" placeholder="ADSIB-ACTA-2026-0042" />
+                  <input id="citeDoc" type="text" formControlName="documentoCite" placeholder="ENT-ACTA-2026-0042" />
                 </div>
                 <div class="form-group">
                   <label for="nuevaUbicacion">Nueva Ubicación Física</label>
@@ -921,7 +921,7 @@ import jsQR from 'jsqr';
                     type="text"
                     [(ngModel)]="inputQrEscaneo"
                     (keyup.enter)="procesarEscaneoQr()"
-                    placeholder="Ej: ADSIB-12400-0001"
+                    placeholder="Ej: ENT-12400-0001"
                   />
                   <button
                     type="button"
@@ -2205,7 +2205,7 @@ export class ActivosListComponent implements OnInit, OnDestroy {
       documentoC31: [''],
       entidadDonante: [''],
       motivoReingreso: [''],
-      documentoCite: ['ADSIB-ING-ACT-2026-001'],
+      documentoCite: ['ENT-ING-ACT-2026-001'],
       codigoBarras: ['', Validators.required],
       descripcion: ['', Validators.required],
       precioInicial: [1000, [Validators.required, Validators.min(1)]],
@@ -2219,7 +2219,7 @@ export class ActivosListComponent implements OnInit, OnDestroy {
     this.asignacionForm = this.fb.group({
       activoId: ['', Validators.required],
       funcionarioNombre: ['', Validators.required],
-      documentoCite: ['ADSIB-ACTA-2026-001'],
+      documentoCite: ['ENT-ACTA-2026-001'],
       ubicacion: ['Piso 2 - Dirección Ejecutiva'],
       observaciones: ['Asignación oficial para cumplimiento de funciones institucionales.'],
     });
@@ -2377,14 +2377,14 @@ export class ActivosListComponent implements OnInit, OnDestroy {
       next: (res) => {
         const acta = res.data?.[0];
         if (acta) {
-          this.abrirVisorActaId(acta.id, acta.documentoCite || 'ADSIB-ACTA-OFICIAL');
+          this.abrirVisorActaId(acta.id, acta.documentoCite || 'ENT-ACTA-OFICIAL');
         } else {
           // Generar acta previa
-          this.abrirVisorActaId('seed-acta-entrega-001', 'ADSIB-ACTA-2026-0001');
+          this.abrirVisorActaId('seed-acta-entrega-001', 'ENT-ACTA-2026-0001');
         }
       },
       error: () => {
-        this.abrirVisorActaId('seed-acta-entrega-001', 'ADSIB-ACTA-2026-0001');
+        this.abrirVisorActaId('seed-acta-entrega-001', 'ENT-ACTA-2026-0001');
       },
     });
   }

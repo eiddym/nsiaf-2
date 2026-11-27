@@ -404,7 +404,7 @@ import jsQR from 'jsqr';
                       type="text"
                       [(ngModel)]="manualCodeInput"
                       (keyup.enter)="procesarCodigoManual()"
-                      placeholder="Ej: ADSIB-12400-0001"
+                      placeholder="Ej: ENT-12400-0001"
                       class="mobile-text-input"
                     />
                     <button type="button" class="btn-manual-submit" (click)="procesarCodigoManual()">
@@ -476,7 +476,7 @@ import jsQR from 'jsqr';
                   type="text"
                   [(ngModel)]="manualCodeInput"
                   (keyup.enter)="procesarCodigoManual()"
-                  placeholder="ADSIB-12400-0001..."
+                  placeholder="ENT-12400-0001..."
                   class="mobile-text-input mini"
                 />
                 <button type="button" class="btn-manual-apply" (click)="procesarCodigoManual()">

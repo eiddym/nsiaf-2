@@ -26,7 +26,7 @@ export class CreateTraspasoDto {
   @IsString()
   almacenDestinoId!: string;
 
-  @ApiPropertyOptional({ example: 'ADSIB-TRASP-2026-0005', description: 'CITE oficial de asignación de suministros' })
+  @ApiPropertyOptional({ example: 'ENT-TRASP-2026-0005', description: 'CITE oficial de asignación de suministros' })
   @IsOptional()
   @IsString()
   documentoCite?: string;

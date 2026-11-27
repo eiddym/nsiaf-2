@@ -335,7 +335,7 @@ import { AlmacenesOperacionesPanelComponent } from './almacenes-operaciones-pane
                   type="text"
                   [(ngModel)]="traspasoForm.documentoCite"
                   name="documentoCite"
-                  placeholder="Ej: ADSIB-TRASP-2026-0010"
+                  placeholder="Ej: ENT-TRASP-2026-0010"
                 />
               </div>
 
@@ -484,7 +484,7 @@ import { AlmacenesOperacionesPanelComponent } from './almacenes-operaciones-pane
                     id="ingresoCite"
                     type="text"
                     formControlName="documentoCite"
-                    placeholder="Ej: ADSIB-CITE-2026-081"
+                    placeholder="Ej: ENT-CITE-2026-081"
                     required
                   />
                 </div>
@@ -576,7 +576,7 @@ import { AlmacenesOperacionesPanelComponent } from './almacenes-operaciones-pane
                     id="solicitudCite"
                     type="text"
                     formControlName="documentoCite"
-                    placeholder="ADSIB-SOL-2026-0045"
+                    placeholder="ENT-SOL-2026-0045"
                   />
                 </div>
               </div>
@@ -1542,7 +1542,7 @@ export class AlmacenesComponent implements OnInit {
 
     this.solicitudForm = this.fb.group({
       solicitante: ['', Validators.required],
-      documentoCite: ['ADSIB-SOL-2026-0045'],
+      documentoCite: ['ENT-SOL-2026-0045'],
       subarticuloId: ['', Validators.required],
       cantidad: [5, [Validators.required, Validators.min(1)]],
       motivo: ['Dotación de insumos para tareas operativas.'],
@@ -1623,7 +1623,7 @@ export class AlmacenesComponent implements OnInit {
       destinoId: '',
       subarticuloId: '',
       cantidad: 1,
-      documentoCite: `ADSIB-TRASP-2026-000${Math.floor(Math.random() * 90 + 10)}`,
+      documentoCite: `ENT-TRASP-2026-000${Math.floor(Math.random() * 90 + 10)}`,
       motivo: 'Dotación periódica de suministros para sucursal',
     };
     this.mostrarModalTraspaso.set(true);

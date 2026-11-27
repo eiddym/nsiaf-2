@@ -23,13 +23,13 @@ async function main() {
 
   // 1. Limpiar o verificar Entidad
   const entidad = await prisma.entidad.upsert({
-    where: { codigo: 'ADSIB' },
+    where: { codigo: 'ENT' },
     update: {},
     create: {
-      codigo: 'ADSIB',
-      nombre: 'Agencia para el Desarrollo de la Sociedad de la Información en Bolivia',
-      sigla: 'ADSIB',
-      encabezado: 'ESTADO PLURINACIONAL DE BOLIVIA - ADSIB',
+      codigo: 'ENT',
+      nombre: 'Entidad Institucional Principal',
+      sigla: 'ENT',
+      encabezado: 'SISTEMA INTEGRADO DE ACTIVOS FIJOS Y ALMACENES',
       piePagina: 'Calle Ayacucho esq. Potosí, Edif. Telecomunicaciones Piso 4, La Paz - Bolivia',
     },
   });
@@ -88,7 +88,7 @@ async function main() {
       passwordHash: adminPasswordHash,
       nombres: 'Super',
       apellidos: 'Administrador',
-      email: 'admin@adsib.gob.bo',
+      email: 'admin@entidad.bo',
       cargo: 'Administrador General del Sistema',
       telefono: '22112233',
       rol: RolUsuario.SUPER_ADMIN,
@@ -108,7 +108,7 @@ async function main() {
       passwordHash: respActivosPasswordHash,
       nombres: 'Carlos',
       apellidos: 'Mamani Quispe',
-      email: 'cmamani@adsib.gob.bo',
+      email: 'cmamani@entidad.bo',
       cargo: 'Responsable de Activos Fijos',
       telefono: '71928374',
       rol: RolUsuario.ADMIN_ACTIVOS,
@@ -170,7 +170,7 @@ async function main() {
       passwordHash: funcionarioPasswordHash,
       nombres: 'Jorge',
       apellidos: 'Flores Vargas',
-      email: 'jflores@adsib.gob.bo',
+      email: 'jflores@entidad.bo',
       cargo: 'Especialista en Infraestructura y Redes',
       telefono: '76543210',
       rol: RolUsuario.FUNCIONARIO,
@@ -335,7 +335,7 @@ async function main() {
         facturaFecha: new Date(),
         nroC31: 'C31-2026-0045',
         notaEntregaNumero: 'NE-0012',
-        documentoCite: 'ADSIB-UAF-CITE-2026-0034',
+        documentoCite: 'ENT-UAF-CITE-2026-0034',
         total: 18500.0,
         observacion: 'Adquisición de equipamiento informático para el personal técnico',
         creadoPorId: respActivos.id,
@@ -344,10 +344,10 @@ async function main() {
   }
 
   await prisma.activo.upsert({
-    where: { codigoBarras: 'ADSIB-12400-0001' },
+    where: { codigoBarras: 'ENT-12400-0001' },
     update: {},
     create: {
-      codigoBarras: 'ADSIB-12400-0001',
+      codigoBarras: 'ENT-12400-0001',
       descripcion: 'Laptop Quipus Kuti Ultra Core i7 32GB RAM 1TB SSD',
       detalle: 'Teclado retroiluminado en español, cargador original y funda',
       marca: 'QUIPUS',
@@ -370,10 +370,10 @@ async function main() {
   });
 
   await prisma.activo.upsert({
-    where: { codigoBarras: 'ADSIB-12400-0002' },
+    where: { codigoBarras: 'ENT-12400-0002' },
     update: {},
     create: {
-      codigoBarras: 'ADSIB-12400-0002',
+      codigoBarras: 'ENT-12400-0002',
       descripcion: 'Laptop Quipus Kuti Ultra Core i7 32GB RAM 1TB SSD',
       detalle: 'Teclado retroiluminado en español, cargador original y funda',
       marca: 'QUIPUS',

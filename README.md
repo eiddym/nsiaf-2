@@ -1,6 +1,6 @@
 # NSIAF v2
 
-**Sistema Integrado de Activos Fijos y Almacenes** — reescritura moderna del sistema NSIAF, con arquitectura de monorepo, backend NestJS, base de datos PostgreSQL en Docker y frontend Angular 19.
+**Sistema Integrado de Activos Fijos y Almacenes** — desarrollo nuevo e independiente inspirado en el NSIAF de ADSIB, construido desde cero con arquitectura de monorepo, backend NestJS, base de datos PostgreSQL en Docker y frontend Angular 19.
 
 ## Stack tecnológico
 

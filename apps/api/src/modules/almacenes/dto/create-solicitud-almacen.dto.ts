@@ -16,7 +16,7 @@ export class DetalleSolicitudItemDto {
 }
 
 export class CreateSolicitudAlmacenDto {
-  @ApiPropertyOptional({ example: 'ADSIB-SOL-2026-0012', description: 'Cite oficial vinculado si existe' })
+  @ApiPropertyOptional({ example: 'ENT-SOL-2026-0012', description: 'Cite oficial vinculado si existe' })
   @IsOptional()
   @IsString()
   documentoCite?: string;

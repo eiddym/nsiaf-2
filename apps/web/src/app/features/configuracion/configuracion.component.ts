@@ -196,7 +196,7 @@ import { AuthService } from '../../core/services/auth.service';
                 type="text"
                 [(ngModel)]="siglaEntidad"
                 class="form-control"
-                placeholder="Ej: COOP, ADSIB, AGETIC"
+                placeholder="Ej: ENT, COOP, ORG"
               />
             </div>
 

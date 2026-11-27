@@ -98,7 +98,7 @@ export class CreateIngresoActivoDto {
   @IsString()
   notaEntregaNumero?: string;
 
-  @ApiPropertyOptional({ example: 'ADSIB-UAF-CITE-2026-0120' })
+  @ApiPropertyOptional({ example: 'ENT-UAF-CITE-2026-0120' })
   @IsOptional()
   @IsString()
   documentoCite?: string;

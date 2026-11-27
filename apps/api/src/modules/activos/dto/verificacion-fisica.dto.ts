@@ -9,7 +9,7 @@ export enum EstadoVigenciaVerificacion {
 }
 
 export class VerificacionFisicaDto {
-  @ApiProperty({ description: 'ID o Código de Barras / QR del Activo', example: 'ADSIB-12400-0001' })
+  @ApiProperty({ description: 'ID o Código de Barras / QR del Activo', example: 'ENT-12400-0001' })
   @IsNotEmpty()
   @IsString()
   identificador: string;

@@ -240,7 +240,7 @@ test.describe('Contrastación y Auditoría de Accesibilidad (Axe-Core) NSIAF vs 
     // Comprobar aviso de administración back-office
     await expect(page.locator('.header-badge-scope')).toBeVisible();
 
-    // Comprobar presencia de Entidad principal (ADSIB)
+    // Comprobar presencia de Entidad principal (ENT)
     await expect(page.locator('.entidad-card').first()).toBeVisible();
 
     // Auditoría de Accesibilidad Axe

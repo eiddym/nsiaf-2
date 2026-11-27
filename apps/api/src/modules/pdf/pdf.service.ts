@@ -70,7 +70,7 @@ export class PdfService {
     });
     y -= 14;
 
-    page.drawText(entidad?.nombre || 'AGENCIA PARA EL DESARROLLO DE LA SOCIEDAD DE LA INFORMACIÓN', {
+    page.drawText(entidad?.nombre || 'ENTIDAD INSTITUCIONAL', {
       x: 50,
       y,
       size: 8,

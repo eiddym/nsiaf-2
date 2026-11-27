@@ -58,7 +58,7 @@ export class CreateIngresoAlmacenDto {
   @IsString()
   nroC31?: string;
 
-  @ApiPropertyOptional({ example: 'ADSIB-ALM-CITE-2026-0045' })
+  @ApiPropertyOptional({ example: 'ENT-ALM-CITE-2026-0045' })
   @IsOptional()
   @IsString()
   documentoCite?: string;

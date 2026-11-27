@@ -80,7 +80,7 @@ export class InteropService {
    * Sincronización automática de solicitantes provenientes de Plantillas:
    * 1. Extrae CI, nombres, apellidos, cargo, email, teléfono.
    * 2. Detecta la jerarquía (JEFE vs OPERADOR / MAE).
-   * 3. Resuelve Entidad y Edificio (ej. ADSIB / Edificio Central).
+   * 3. Resuelve Entidad y Edificio (ej. ENT / Edificio Central).
    * 4. Resuelve la jerarquía organizacional recursiva (Unidad Padre y Sub-unidad).
    * 5. Realiza Upsert del usuario vinculándolo a su respectiva Sub-unidad / Unidad.
    */
@@ -143,8 +143,8 @@ export class InteropService {
       entidad = await this.prisma.entidad.create({
         data: {
           codigo: 'ENT-001',
-          sigla: 'ADSIB',
-          nombre: 'Agencia para el Desarrollo de la Sociedad de la Información en Bolivia',
+          sigla: 'ENT',
+          nombre: 'Entidad Institucional Principal',
         },
         include: { edificios: true },
       });
@@ -155,7 +155,7 @@ export class InteropService {
       edificio = await this.prisma.edificio.create({
         data: {
           codigo: 'EDIF-001',
-          nombre: 'Edificio Central ADSIB',
+          nombre: 'Edificio Central',
           entidadId: entidad.id,
         },
       });
@@ -337,8 +337,8 @@ export class InteropService {
         cargo: usuario.cargo,
         jerarquia: usuario.jerarquia,
         esJefe: usuario.esJefe,
-        entidad: usuario.unidad?.edificio?.entidad?.nombre || 'ADSIB',
-        siglaEntidad: usuario.unidad?.edificio?.entidad?.sigla || 'ADSIB',
+        entidad: usuario.unidad?.edificio?.entidad?.nombre || 'ENT',
+        siglaEntidad: usuario.unidad?.edificio?.entidad?.sigla || 'ENT',
         edificio: usuario.unidad?.edificio?.nombre || 'Edificio Central',
         unidad: unidadPrincipal || 'Sin Unidad',
         siglaUnidad: esSubunidad ? usuario.unidad?.unidadPadre?.sigla : usuario.unidad?.sigla,
@@ -432,7 +432,7 @@ export class InteropService {
         cargo: usuario.cargo,
         jerarquia: usuario.jerarquia,
         esJefe: usuario.esJefe,
-        entidad: usuario.unidad?.edificio?.entidad?.nombre || 'ADSIB',
+        entidad: usuario.unidad?.edificio?.entidad?.nombre || 'ENT',
         unidad: esSub ? usuario.unidad?.unidadPadre?.nombre : usuario.unidad?.nombre,
         subunidad: esSub ? usuario.unidad?.nombre : null,
       },

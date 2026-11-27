@@ -29,7 +29,7 @@ export class RegisterUserDto {
   @IsString()
   apellidos!: string;
 
-  @ApiPropertyOptional({ example: 'juan.perez@adsib.gob.bo', description: 'Correo electrónico' })
+  @ApiPropertyOptional({ example: 'juan.perez@entidad.bo', description: 'Correo electrónico' })
   @IsOptional()
   @IsEmail()
   email?: string;

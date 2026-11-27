@@ -233,17 +233,17 @@ import { EntidadesService, Entidad, InstitucionHija } from '../../core/services/
               <div class="form-row">
                 <div class="form-group">
                   <label for="entCodigo">Código Oficial</label>
-                  <input id="entCodigo" type="text" formControlName="codigo" placeholder="Ej: ADSIB" />
+                  <input id="entCodigo" type="text" formControlName="codigo" placeholder="Ej: ENT" />
                 </div>
                 <div class="form-group">
                   <label for="entSigla">Sigla Institucional</label>
-                  <input id="entSigla" type="text" formControlName="sigla" placeholder="Ej: ADSIB, AGETIC" />
+                  <input id="entSigla" type="text" formControlName="sigla" placeholder="Ej: ENT, COOP" />
                 </div>
               </div>
 
               <div class="form-group">
                 <label for="entNombre">Nombre Oficial de la Entidad</label>
-                <input id="entNombre" type="text" formControlName="nombre" placeholder="Ej: Agencia para el Desarrollo de la Sociedad de la Información" />
+                <input id="entNombre" type="text" formControlName="nombre" placeholder="Ej: Entidad Institucional Principal" />
               </div>
 
               <div class="form-group">

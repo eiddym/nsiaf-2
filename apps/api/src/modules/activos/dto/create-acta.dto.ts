@@ -13,7 +13,7 @@ export class CreateActaDto {
   @IsString()
   usuarioFuncionarioId!: string;
 
-  @ApiPropertyOptional({ example: 'ADSIB-ACTA-2026-0091', description: 'Código CITE oficial vinculado de Plantillas' })
+  @ApiPropertyOptional({ example: 'ENT-ACTA-2026-0091', description: 'Código CITE oficial vinculado de Plantillas' })
   @IsOptional()
   @IsString()
   documentoCite?: string;

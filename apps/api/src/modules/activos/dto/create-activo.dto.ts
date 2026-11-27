@@ -3,7 +3,7 @@ import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from '
 import { EstadoActivo } from '@prisma/client';
 
 export class CreateActivoDto {
-  @ApiProperty({ example: 'ADSIB-12400-0003', description: 'Código de barras único del activo' })
+  @ApiProperty({ example: 'ENT-12400-0003', description: 'Código de barras único del activo' })
   @IsNotEmpty()
   @IsString()
   codigoBarras!: string;

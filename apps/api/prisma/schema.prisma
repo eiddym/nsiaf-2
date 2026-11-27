@@ -74,7 +74,7 @@ model Entidad {
   id         String     @id @default(uuid())
   codigo     String     @unique @db.VarChar(50)
   nombre     String     @db.VarChar(250)
-  sigla      String     @db.VarChar(50) // Usado para prefijos de códigos de barra (ej. ADSIB, AGETIC)
+  sigla      String     @db.VarChar(50) // Usado para prefijos de códigos de barra (ej. ENT, COOP)
   encabezado String?    @db.VarChar(255)
   piePagina  String?    @db.VarChar(255)
   edificios  Edificio[]
