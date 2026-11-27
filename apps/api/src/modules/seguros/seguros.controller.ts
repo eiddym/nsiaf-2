@@ -12,7 +12,7 @@ import { RolUsuario } from '@prisma/client';
 @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
 @Controller('seguros')
 export class SegurosController {
-  constructor(private readonly segurosService: SegurosService) {}
+  constructor(private readonly segurosService: SegurosService) { }
 
   @Get()
   @ApiOperation({ summary: 'Listar pólizas de seguro con estado y días restantes de vigencia' })

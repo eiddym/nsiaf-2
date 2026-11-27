@@ -9,7 +9,7 @@ import { RolUsuario } from '@prisma/client';
 @ApiTags('Estructura Organizacional: Entidades e Instituciones')
 @Controller('entidades')
 export class EntidadesController {
-  constructor(private readonly entidadesService: EntidadesService) {}
+  constructor(private readonly entidadesService: EntidadesService) { }
 
   @Get()
   @ApiOperation({ summary: 'Listar entidades institucionales con sus instituciones / edificios hijas' })
