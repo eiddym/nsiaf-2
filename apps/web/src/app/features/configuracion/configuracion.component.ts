@@ -283,6 +283,39 @@ import { AuthService } from '../../core/services/auth.service';
               </div>
             </div>
           </div>
+
+          <!-- CARD 4: CLASIFICADORES PRESUPUESTARIOS GESTIÓN 2027 (MEFP - RM Nº 271) -->
+          <div class="config-card full-width">
+            <div class="card-title">
+              <span class="material-icons title-icon">menu_book</span>
+              <div>
+                <h3>Clasificadores Presupuestarios Oficiales Gestión 2027 (MEFP — RM Nº 271)</h3>
+                <p>
+                  Sincroniza de forma idempotente las partidas oficiales del <strong>Grupo 30000 (Materiales y Suministros)</strong> para Almacenes y del <strong>Grupo 40000 (Activos Reales)</strong> con vidas útiles D.S. 24051 para Activos Fijos.
+                </p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;">
+              <button
+                mat-raised-button
+                color="accent"
+                type="button"
+                (click)="sincronizarClasificadores2027()"
+                [disabled]="isSyncing2027"
+              >
+                <mat-icon>sync</mat-icon>
+                <span>{{ isSyncing2027 ? 'Sincronizando Catálogos 2027...' : 'Cargar / Actualizar Clasificadores Presupuestarios 2027' }}</span>
+              </button>
+              <a routerLink="/usuarios" mat-stroked-button color="primary">
+                <mat-icon>group</mat-icon>
+                <span>Ir a Gestión de Usuarios y Roles</span>
+              </a>
+              <a routerLink="/entidades" mat-stroked-button color="primary">
+                <mat-icon>account_tree</mat-icon>
+                <span>Ir a Entidades y Organigrama</span>
+              </a>
+            </div>
+          </div>
         </div>
 
         <div class="config-actions">
@@ -628,6 +661,7 @@ export class ConfiguracionComponent implements OnInit {
   authentikClientId = '';
 
   isSaving = false;
+  isSyncing2027 = false;
 
   constructor(
     private configService: ConfiguracionService,
@@ -692,6 +726,22 @@ export class ConfiguracionComponent implements OnInit {
       error: (err) => {
         this.isSaving = false;
         this.snackBar.open(err.error?.message || 'Error al guardar la configuración', 'Cerrar', { duration: 3000 });
+      },
+    });
+  }
+
+  sincronizarClasificadores2027(): void {
+    this.isSyncing2027 = true;
+    this.configService.cargarClasificadores2027().subscribe({
+      next: (res) => {
+        this.isSyncing2027 = false;
+        this.snackBar.open(res?.mensaje || 'Clasificador Presupuestario 2027 sincronizado correctamente', 'OK', {
+          duration: 5000,
+        });
+      },
+      error: (err) => {
+        this.isSyncing2027 = false;
+        this.snackBar.open(err?.error?.message || 'Error al cargar Clasificadores 2027', 'Cerrar', { duration: 4000 });
       },
     });
   }

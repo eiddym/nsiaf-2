@@ -834,4 +834,84 @@ export class PdfService {
 
     return pdfDoc.save();
   }
+
+  /**
+   * Genera el Reporte Oficial de Inventario Físico Valorado de Almacenes en PDF.
+   */
+  async generarInventarioValoradoAlmacenPdf(): Promise<Uint8Array> {
+    const subarticulos = await this.prisma.subarticulo.findMany({
+      where: { activo: true },
+      include: { material: true },
+      orderBy: [{ material: { codigo: 'asc' } }, { codigo: 'asc' }],
+    });
+
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([841.89, 595.28]); // A4 Landscape
+    const { width, height } = page.getSize();
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    const primaryColor = rgb(0.08, 0.14, 0.35);
+    const textColor = rgb(0.15, 0.15, 0.15);
+    const borderColor = rgb(0.8, 0.8, 0.85);
+
+    page.drawText('INVENTARIO FÍSICO VALORADO DE ALMACENES Y SUMINISTROS', {
+      x: 40,
+      y: height - 38,
+      size: 13,
+      font: fontBold,
+      color: primaryColor,
+    });
+    page.drawText(`Fecha de emisión: ${new Date().toISOString().slice(0, 10)}  ·  Clasificador Presupuestario Grupo 30000`, {
+      x: 40,
+      y: height - 53,
+      size: 8.5,
+      font: fontRegular,
+      color: rgb(0.4, 0.4, 0.45),
+    });
+
+    let y = height - 80;
+    const cols = [40, 105, 175, 445, 535, 620, 710];
+    const headers = ['PARTIDA', 'CÓDIGO', 'DESCRIPCIÓN DEL SUMINISTRO', 'UNIDAD', 'EXISTENCIA', 'COSTO UNIT.', 'VALOR TOTAL (Bs)'];
+
+    page.drawRectangle({ x: 40, y: y - 16, width: width - 80, height: 18, color: primaryColor });
+    headers.forEach((h, i) => {
+      page.drawText(h, { x: cols[i] + 2, y: y - 11, size: 7.5, font: fontBold, color: rgb(1, 1, 1) });
+    });
+    y -= 20;
+
+    let granTotal = 0;
+    for (const item of subarticulos) {
+      if (y < 60) break;
+      const stock = Number(item.stockActual);
+      const costo = Number(item.costoUnitarioPromedio);
+      const total = stock * costo;
+      granTotal += total;
+
+      page.drawText(item.material?.codigo || '30000', { x: cols[0] + 2, y: y - 10, size: 7.5, font: fontBold, color: primaryColor });
+      page.drawText(String(item.codigo), { x: cols[1] + 2, y: y - 10, size: 7.5, font: fontRegular, color: textColor });
+      page.drawText(item.descripcion.slice(0, 48), { x: cols[2] + 2, y: y - 10, size: 7.5, font: fontRegular, color: textColor });
+      page.drawText(item.unidadMedida.slice(0, 14), { x: cols[3] + 2, y: y - 10, size: 7.5, font: fontRegular, color: textColor });
+      page.drawText(stock.toFixed(2), { x: cols[4] + 2, y: y - 10, size: 7.5, font: fontBold, color: textColor });
+      page.drawText(costo.toFixed(2), { x: cols[5] + 2, y: y - 10, size: 7.5, font: fontRegular, color: textColor });
+      page.drawText(total.toFixed(2), { x: cols[6] + 2, y: y - 10, size: 7.5, font: fontBold, color: primaryColor });
+
+      y -= 15;
+      page.drawLine({ start: { x: 40, y: y + 2 }, end: { x: width - 40, y: y + 2 }, thickness: 0.5, color: borderColor });
+    }
+
+    y -= 6;
+    page.drawText(`TOTAL ÍTEMS EN CATÁLOGO: ${subarticulos.length}`, { x: cols[2], y: y - 10, size: 8.5, font: fontBold, color: primaryColor });
+    page.drawText(`Bs. ${granTotal.toFixed(2)}`, { x: cols[6], y: y - 10, size: 9, font: fontBold, color: primaryColor });
+
+    page.drawText('Inventario Físico Valorado Oficial · Generado por NSIAF v2', {
+      x: 40,
+      y: 20,
+      size: 7,
+      font: fontRegular,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+
+    return pdfDoc.save();
+  }
 }

@@ -268,7 +268,44 @@ import { DashboardService, ResumenDashboard } from '../../core/services/dashboar
           </section>
         }
 
-        <!-- 3. VISTA PARA FUNCIONARIOS (Portal Solicitante rápido) -->
+        <!-- 3. CONSOLA DE ADMINISTRACIÓN Y GOBERNANZA (Solo SUPER_ADMIN / ADMIN_GENERAL) -->
+        @if (esSuperAdmin()) {
+          <section class="module-section">
+            <div class="section-title">
+              <span class="material-icons sec-icon">admin_panel_settings</span>
+              <h2>Consola de Administración Central & Gobernanza</h2>
+            </div>
+            <div class="metrics-row">
+              <a routerLink="/usuarios" class="metric-box" style="text-decoration:none;cursor:pointer;">
+                <span class="metric-title">Usuarios & Roles RBAC</span>
+                <span class="metric-num" style="font-size:1.15rem;color:#0284c7;">Gestionar Personal →</span>
+                <span class="metric-sub">Crear usuarios, asignar responsables y auxiliares</span>
+              </a>
+              <a routerLink="/entidades" class="metric-box" style="text-decoration:none;cursor:pointer;">
+                <span class="metric-title">Entidades & Organigrama</span>
+                <span class="metric-num" style="font-size:1.15rem;color:#0f766e;">Estructura & Sync →</span>
+                <span class="metric-sub">Crear organigrama propio o absorber desde Plantillas</span>
+              </a>
+              <a routerLink="/proveedores" class="metric-box" style="text-decoration:none;cursor:pointer;">
+                <span class="metric-title">Proveedores & Contactos</span>
+                <span class="metric-num" style="font-size:1.15rem;color:#b45309;">Directorio NIT →</span>
+                <span class="metric-sub">Empresas proveedoras de bienes y suministros</span>
+              </a>
+              <a routerLink="/configuracion" class="metric-box" style="text-decoration:none;cursor:pointer;">
+                <span class="metric-title">Configuración & MEFP 2027</span>
+                <span class="metric-num" style="font-size:1.15rem;color:#4f46e5;">Parámetros & SSO →</span>
+                <span class="metric-sub">Modalidad, Authentik y Clasificadores 2027</span>
+              </a>
+              <a routerLink="/auditoria" class="metric-box" style="text-decoration:none;cursor:pointer;">
+                <span class="metric-title">Histórico Forense</span>
+                <span class="metric-num" style="font-size:1.15rem;color:#7c3aed;">Ver Auditoría →</span>
+                <span class="metric-sub">Registro de altas, bajas y cambios de roles</span>
+              </a>
+            </div>
+          </section>
+        }
+
+        <!-- 4. VISTA PARA FUNCIONARIOS (Portal Solicitante rápido) -->
         @if (esFuncionario()) {
           <section class="module-section">
             <div class="section-title">
@@ -757,6 +794,11 @@ export class DashboardComponent implements OnInit {
   esFuncionario(): boolean {
     const r = this.resumen();
     return !r?.activos && !r?.almacenes;
+  }
+
+  esSuperAdmin(): boolean {
+    const user = this.authService.currentUser();
+    return !!(user && (user.rol === 'SUPER_ADMIN' || user.rol === 'ADMIN_GENERAL'));
   }
 
   getRoleClass(): string {

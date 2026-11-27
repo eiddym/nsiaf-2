@@ -593,4 +593,85 @@ export class AlmacenesService {
       });
     });
   }
+
+  async rechazarSolicitud(id: string, motivo?: string) {
+    const solicitud = await this.prisma.solicitudAlmacen.findUnique({ where: { id } });
+    if (!solicitud) throw new NotFoundException('Solicitud de almacén no encontrada');
+    if (solicitud.estado === EstadoSolicitud.ENTREGADA) {
+      throw new BadRequestException('No se puede rechazar una solicitud que ya fue entregada.');
+    }
+    return this.prisma.solicitudAlmacen.update({
+      where: { id },
+      data: {
+        estado: EstadoSolicitud.RECHAZADA,
+        observacion: motivo ? `[RECHAZADA]: ${motivo}` : solicitud.observacion,
+      },
+    });
+  }
+
+  // ==========================================
+  // CATÁLOGO DE MATERIALES (GRUPO 30000) E HISTORIAL DE INGRESOS
+  // ==========================================
+
+  async listarMateriales() {
+    return this.prisma.material.findMany({
+      include: {
+        _count: { select: { subarticulos: true } },
+      },
+      orderBy: { codigo: 'asc' },
+    });
+  }
+
+  async crearMaterial(dto: { codigo: string; descripcion: string }) {
+    const dup = await this.prisma.material.findUnique({ where: { codigo: dto.codigo.trim() } });
+    if (dup) throw new BadRequestException(`Ya existe el grupo/partida de material ${dto.codigo}`);
+
+    return this.prisma.material.create({
+      data: {
+        codigo: dto.codigo.trim(),
+        descripcion: dto.descripcion.trim(),
+      },
+    });
+  }
+
+  async actualizarSubarticulo(
+    id: string,
+    dto: { descripcion?: string; unidadMedida?: string; materialId?: string; activo?: boolean },
+  ) {
+    return this.prisma.subarticulo.update({
+      where: { id },
+      data: {
+        ...(dto.descripcion !== undefined ? { descripcion: dto.descripcion.trim() } : {}),
+        ...(dto.unidadMedida !== undefined ? { unidadMedida: dto.unidadMedida.trim() } : {}),
+        ...(dto.materialId !== undefined ? { materialId: dto.materialId } : {}),
+        ...(dto.activo !== undefined ? { activo: dto.activo } : {}),
+      },
+      include: { material: true },
+    });
+  }
+
+  async listarIngresos(page = 1, limit = 30) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.ingresoAlmacen.findMany({
+        skip,
+        take: limit,
+        include: {
+          almacen: { select: { id: true, codigo: true, nombre: true } },
+          proveedor: { select: { id: true, nit: true, razonSocial: true } },
+          creadoPor: { select: { id: true, nombres: true, apellidos: true } },
+          detalles: {
+            include: { subarticulo: { select: { codigo: true, descripcion: true, unidadMedida: true } } },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.ingresoAlmacen.count(),
+    ]);
+
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
 }

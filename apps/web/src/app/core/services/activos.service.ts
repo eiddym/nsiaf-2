@@ -81,4 +81,37 @@ export class ActivosService {
   }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/verificacion-fisica`, dto);
   }
+
+  actualizarActivo(id: string, dto: any): Observable<ActivoFijo> {
+    return this.http.put<ActivoFijo>(`${this.baseUrl}/${id}`, dto);
+  }
+
+  listarCuentas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/cuentas`);
+  }
+
+  crearCuenta(dto: { codigo: number; nombre: string; vidaUtilMeses: number; depreciar?: boolean; actualizar?: boolean }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/cuentas`, dto);
+  }
+
+  crearAuxiliar(cuentaId: string, dto: { codigo: number; nombre: string }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/cuentas/${cuentaId}/auxiliares`, dto);
+  }
+
+  listarBajas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/bajas`);
+  }
+
+  registrarBaja(dto: { activoIds: string[]; motivo: string; documentoCite?: string; observacion?: string }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/bajas`, dto);
+  }
+
+  listarSolicitudes(estado?: string): Observable<any[]> {
+    const q = estado ? `?estado=${estado}` : '';
+    return this.http.get<any[]>(`${this.baseUrl}/solicitudes${q}`);
+  }
+
+  actualizarEstadoSolicitud(id: string, estado: string, observacion?: string): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/solicitudes/${id}/estado`, { estado, observacion });
+  }
 }

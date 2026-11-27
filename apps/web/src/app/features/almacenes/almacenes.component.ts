@@ -15,6 +15,7 @@ import {
 } from '../../core/services/almacenes-client.service';
 import { ProveedoresService, Proveedor } from '../../core/services/proveedores.service';
 import { VisorPdfDialogComponent } from '../../shared/components/visor-pdf/visor-pdf-dialog.component';
+import { AlmacenesOperacionesPanelComponent } from './almacenes-operaciones-panel.component';
 
 @Component({
   selector: 'app-almacenes',
@@ -29,6 +30,7 @@ import { VisorPdfDialogComponent } from '../../shared/components/visor-pdf/visor
     MatChipsModule,
     MatTooltipModule,
     MatDialogModule,
+    AlmacenesOperacionesPanelComponent,
   ],
   template: `
     <div class="almacenes-page">
@@ -752,6 +754,9 @@ import { VisorPdfDialogComponent } from '../../shared/components/visor-pdf/visor
           </div>
         </div>
       }
+
+      <!-- Panel Operativo Integral: Solicitudes, Ingresos, Catálogo Grupo 30000 y PDF Valorado -->
+      <app-almacenes-operaciones-panel (datosActualizados)="cargarAlmacenes()"></app-almacenes-operaciones-panel>
     </div>
   `,
   styles: [`

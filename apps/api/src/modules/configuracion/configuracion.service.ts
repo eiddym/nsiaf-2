@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RolUsuario } from '@prisma/client';
+import { CLASIFICADOR_ACTIVOS_2027, CLASIFICADOR_MATERIALES_2027 } from './clasificadores-2027.data';
 
 export interface UpdateConfiguracionDto {
   nombreEntidad?: string;
@@ -191,5 +192,91 @@ export class ConfiguracionService {
     }
 
     return this.getConfiguracion();
+  }
+
+  /**
+   * Carga idempotente de Clasificadores Presupuestarios Gestión 2027 (MEFP - RM Nº 271):
+   * - Grupo 30000: Materiales y Suministros (Almacenes)
+   * - Grupo 40000: Activos Reales (Cuentas Contables y Auxiliares de Activos Fijos)
+   */
+  async cargarClasificadores2027() {
+    let materialesCreados = 0;
+    let cuentasCreadas = 0;
+    let auxiliaresCreados = 0;
+
+    for (const mat of CLASIFICADOR_MATERIALES_2027) {
+      const existe = await this.prisma.material.findUnique({ where: { codigo: mat.codigo } });
+      if (!existe) {
+        await this.prisma.material.create({
+          data: { codigo: mat.codigo, descripcion: mat.descripcion, activo: true },
+        });
+        materialesCreados++;
+      } else {
+        await this.prisma.material.update({
+          where: { id: existe.id },
+          data: { descripcion: mat.descripcion },
+        });
+      }
+    }
+
+    for (const cta of CLASIFICADOR_ACTIVOS_2027) {
+      let cuenta = await this.prisma.cuentaContable.findUnique({ where: { codigo: cta.codigo } });
+      if (!cuenta) {
+        cuenta = await this.prisma.cuentaContable.create({
+          data: {
+            codigo: cta.codigo,
+            nombre: cta.nombre,
+            vidaUtilMeses: cta.vidaUtilMeses,
+            depreciar: cta.depreciar,
+            actualizar: cta.actualizar,
+            activo: true,
+          },
+        });
+        cuentasCreadas++;
+      } else {
+        cuenta = await this.prisma.cuentaContable.update({
+          where: { id: cuenta.id },
+          data: {
+            nombre: cta.nombre,
+            vidaUtilMeses: cta.vidaUtilMeses,
+            depreciar: cta.depreciar,
+            actualizar: cta.actualizar,
+          },
+        });
+      }
+
+      for (const aux of cta.auxiliares) {
+        const existeAux = await this.prisma.auxiliar.findUnique({
+          where: {
+            cuentaContableId_codigo: {
+              cuentaContableId: cuenta.id,
+              codigo: aux.codigo,
+            },
+          },
+        });
+        if (!existeAux) {
+          await this.prisma.auxiliar.create({
+            data: {
+              cuentaContableId: cuenta.id,
+              codigo: aux.codigo,
+              nombre: aux.nombre,
+              activo: true,
+            },
+          });
+          auxiliaresCreados++;
+        }
+      }
+    }
+
+    return {
+      ok: true,
+      fuente: 'CLASIFICADORES PRESUPUESTARIOS GESTIÓN 2027 (MEFP - RM Nº 271)',
+      materialesTotal: CLASIFICADOR_MATERIALES_2027.length,
+      materialesCreados,
+      cuentasTotal: CLASIFICADOR_ACTIVOS_2027.length,
+      cuentasCreadas,
+      auxiliaresCreados,
+      mensaje: `Clasificador 2027 sincronizado: ${CLASIFICADOR_MATERIALES_2027.length} partidas Grupo 30000 (Almacenes) y ${CLASIFICADOR_ACTIVOS_2027.length} cuentas Grupo 40000 (Activos Reales).`,
+    };
   }
 }

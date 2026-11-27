@@ -1,15 +1,17 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatMenuModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatButtonModule, MatIconModule, MatMenuModule, MatSnackBarModule],
   template: `
     <div class="layout-container">
       <!-- Topbar Desktop & Mobile -->
@@ -81,10 +83,33 @@ import { AuthService } from '../core/services/auth.service';
             }
 
             @if (esSuperAdmin()) {
-              <a routerLink="/configuracion" routerLinkActive="active" class="nav-item config-item">
-                <span class="material-icons" aria-hidden="true">settings</span>
-                <span>Configuración</span>
-              </a>
+              <button type="button" class="nav-item config-item" [matMenuTriggerFor]="adminMenu">
+                <span class="material-icons" aria-hidden="true">admin_panel_settings</span>
+                <span>Administración</span>
+                <span class="material-icons" aria-hidden="true" style="font-size:18px;">arrow_drop_down</span>
+              </button>
+              <mat-menu #adminMenu="matMenu">
+                <button mat-menu-item routerLink="/usuarios">
+                  <mat-icon>group</mat-icon>
+                  <span>Usuarios y Roles</span>
+                </button>
+                <button mat-menu-item routerLink="/entidades">
+                  <mat-icon>account_tree</mat-icon>
+                  <span>Entidades y Organigrama</span>
+                </button>
+                <button mat-menu-item routerLink="/proveedores">
+                  <mat-icon>storefront</mat-icon>
+                  <span>Proveedores y Contactos</span>
+                </button>
+                <button mat-menu-item routerLink="/configuracion">
+                  <mat-icon>settings</mat-icon>
+                  <span>Configuración y Clasificador 2027</span>
+                </button>
+                <button mat-menu-item routerLink="/auditoria">
+                  <mat-icon>history</mat-icon>
+                  <span>Auditoría / Histórico</span>
+                </button>
+              </mat-menu>
             }
           </nav>
         </div>
@@ -140,11 +165,23 @@ import { AuthService } from '../core/services/auth.service';
                   <span>Escáner QR Móvil</span>
                 </button>
                 @if (esSuperAdmin()) {
+                  <button mat-menu-item routerLink="/usuarios">
+                    <mat-icon>group</mat-icon>
+                    <span>Usuarios y Roles</span>
+                  </button>
                   <button mat-menu-item routerLink="/configuracion">
                     <mat-icon>settings</mat-icon>
                     <span>Configuración Sistema</span>
                   </button>
+                  <button mat-menu-item routerLink="/auditoria">
+                    <mat-icon>history</mat-icon>
+                    <span>Histórico / Auditoría</span>
+                  </button>
                 }
+                <button mat-menu-item (click)="abrirModalPassword()">
+                  <mat-icon>lock_reset</mat-icon>
+                  <span>Cambiar mi Contraseña</span>
+                </button>
                 <button mat-menu-item (click)="logout()">
                   <mat-icon color="warn">logout</mat-icon>
                   <span>Cerrar Sesión</span>
@@ -226,18 +263,25 @@ import { AuthService } from '../core/services/auth.service';
               @if (authService.currentUser()?.accesoActivos || authService.currentUser()?.accesoAlmacenes) {
                 <a routerLink="/entidades" (click)="cerrarMenuMovil()" routerLinkActive="active" class="drawer-link">
                   <span class="material-icons" aria-hidden="true">corporate_fare</span>
-                  <span>Entidades e Instituciones</span>
+                  <span>Entidades y Organigrama</span>
                 </a>
                 <a routerLink="/proveedores" (click)="cerrarMenuMovil()" routerLinkActive="active" class="drawer-link">
                   <span class="material-icons" aria-hidden="true">storefront</span>
-                  <span>Catálogo de Proveedores</span>
+                  <span>Proveedores y Contactos</span>
                 </a>
               }
-
               @if (esSuperAdmin()) {
+                <a routerLink="/usuarios" (click)="cerrarMenuMovil()" routerLinkActive="active" class="drawer-link">
+                  <span class="material-icons" aria-hidden="true">group</span>
+                  <span>Usuarios y Roles</span>
+                </a>
                 <a routerLink="/configuracion" (click)="cerrarMenuMovil()" routerLinkActive="active" class="drawer-link config-drawer-link">
                   <span class="material-icons" aria-hidden="true">settings</span>
-                  <span>Configuración Sistema</span>
+                  <span>Configuración & Clasificador 2027</span>
+                </a>
+                <a routerLink="/auditoria" (click)="cerrarMenuMovil()" routerLinkActive="active" class="drawer-link">
+                  <span class="material-icons" aria-hidden="true">history</span>
+                  <span>Auditoría / Histórico</span>
                 </a>
               }
             </nav>
@@ -249,6 +293,27 @@ import { AuthService } from '../core/services/auth.service';
               </button>
             </div>
           </aside>
+        </div>
+      }
+
+      <!-- Modal Cambiar Contraseña Propia -->
+      @if (mostrarModalPassword()) {
+        <div class="pwd-backdrop" (click)="mostrarModalPassword.set(false)">
+          <div class="pwd-modal" (click)="$event.stopPropagation()">
+            <h3>Cambiar mi Contraseña</h3>
+            <div class="pwd-field">
+              <label>Contraseña actual</label>
+              <input type="password" [(ngModel)]="pwdActual" placeholder="Ingresa tu clave actual" />
+            </div>
+            <div class="pwd-field">
+              <label>Nueva contraseña</label>
+              <input type="password" [(ngModel)]="pwdNueva" placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div class="pwd-actions">
+              <button type="button" class="pwd-btn-cancel" (click)="mostrarModalPassword.set(false)">Cancelar</button>
+              <button type="button" class="pwd-btn-save" (click)="guardarPasswordPropia()">Guardar</button>
+            </div>
+          </div>
         </div>
       }
 
@@ -826,15 +891,50 @@ import { AuthService } from '../core/services/auth.service';
         display: flex;
       }
     }
+    .pwd-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
+    .pwd-modal { background: #fff; color: #0f172a; border-radius: 14px; padding: 1.4rem; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
+    .pwd-modal h3 { margin: 0 0 1rem; font-size: 1.1rem; }
+    .pwd-field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.85rem; }
+    .pwd-field label { font-size: 0.8rem; font-weight: 600; color: #334155; }
+    .pwd-field input { padding: 0.55rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .pwd-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+    .pwd-btn-cancel { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem 0.9rem; border-radius: 8px; cursor: pointer; }
+    .pwd-btn-save { background: #0f172a; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
   `],
 })
 export class MainLayoutComponent {
   menuMovilAbierto = signal<boolean>(false);
+  mostrarModalPassword = signal<boolean>(false);
+  pwdActual = '';
+  pwdNueva = '';
 
   constructor(
     public authService: AuthService,
     private router: Router,
+    private snackBar: MatSnackBar,
   ) {}
+
+  abrirModalPassword(): void {
+    this.pwdActual = '';
+    this.pwdNueva = '';
+    this.mostrarModalPassword.set(true);
+  }
+
+  guardarPasswordPropia(): void {
+    if (!this.pwdActual || this.pwdNueva.length < 6) {
+      this.snackBar.open('Completa tu clave actual y una nueva clave de al menos 6 caracteres.', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    this.authService.cambiarPassword(this.pwdActual, this.pwdNueva).subscribe({
+      next: () => {
+        this.mostrarModalPassword.set(false);
+        this.snackBar.open('Contraseña actualizada correctamente.', 'OK', { duration: 3000 });
+      },
+      error: (err) => {
+        this.snackBar.open(err?.error?.message || 'Error al cambiar contraseña', 'Cerrar', { duration: 3500 });
+      },
+    });
+  }
 
   toggleMenuMovil(): void {
     this.menuMovilAbierto.update((v) => !v);

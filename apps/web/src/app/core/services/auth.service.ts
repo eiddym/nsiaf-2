@@ -56,6 +56,10 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  cambiarPassword(passwordActual: string, passwordNueva: string): Observable<any> {
+    return this.http.patch('/api/v1/auth/cambiar-password', { passwordActual, passwordNueva });
+  }
+
   private getStoredUser(): UsuarioPerfil | null {
     try {
       const stored = localStorage.getItem(USER_KEY);

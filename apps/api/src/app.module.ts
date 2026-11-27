@@ -13,6 +13,8 @@ import { GestionesModule } from './modules/gestiones/gestiones.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { SolicitanteModule } from './modules/solicitante/solicitante.module';
 import { ConfiguracionModule } from './modules/configuracion/configuracion.module';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { AuditoriaModule } from './modules/auditoria/auditoria.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { ConfiguracionModule } from './modules/configuracion/configuracion.modul
     DashboardModule,
     SolicitanteModule,
     ConfiguracionModule,
+    UsuariosModule,
+    AuditoriaModule,
     ActivosModule,
     AlmacenesModule,
     PdfModule,

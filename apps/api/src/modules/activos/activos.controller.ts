@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { ActivosService } from './activos.service';
 import { CreateActivoDto } from './dto/create-activo.dto';
@@ -44,6 +44,71 @@ export class ActivosController {
     return this.activosService.listActas(Number(page) || 1, Number(limit) || 20);
   }
 
+  @Get('cuentas')
+  @ApiOperation({ summary: 'Listar cuentas contables (Grupo 40000) y sus auxiliares' })
+  listarCuentas() {
+    return this.activosService.listarCuentasContables();
+  }
+
+  @Post('cuentas')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Registrar una nueva cuenta contable / rubro de activo fijo' })
+  crearCuenta(
+    @Body() dto: { codigo: number; nombre: string; vidaUtilMeses: number; depreciar?: boolean; actualizar?: boolean },
+  ) {
+    return this.activosService.crearCuentaContable(dto);
+  }
+
+  @Post('cuentas/:id/auxiliares')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Registrar un nuevo auxiliar contable bajo una cuenta' })
+  crearAuxiliar(@Param('id') cuentaId: string, @Body() dto: { codigo: number; nombre: string }) {
+    return this.activosService.crearAuxiliar(cuentaId, dto);
+  }
+
+  @Get('bajas')
+  @ApiOperation({ summary: 'Listar histórico de actas de baja de activos fijos' })
+  listarBajas() {
+    return this.activosService.listarBajas();
+  }
+
+  @Post('bajas')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Registrar baja definitiva de uno o varios activos fijos' })
+  registrarBaja(
+    @Body() dto: { activoIds: string[]; motivo: string; documentoCite?: string; observacion?: string; fecha?: string },
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.activosService.registrarBaja(dto, userId);
+  }
+
+  @Get('solicitudes')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar solicitudes de asignación/devolución enviadas por funcionarios' })
+  listarSolicitudes(@Query('estado') estado?: string) {
+    return this.activosService.listarSolicitudesActivos(estado);
+  }
+
+  @Patch('solicitudes/:id/estado')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Aprobar, entregar o rechazar una solicitud de activo fijo' })
+  actualizarEstadoSolicitud(
+    @Param('id') id: string,
+    @Body() body: { estado: 'APROBADA' | 'ENTREGADA' | 'RECHAZADA' | 'ANULADA'; observacion?: string },
+  ) {
+    return this.activosService.actualizarEstadoSolicitudActivo(id, body.estado, body.observacion);
+  }
+
   @Get('codigo-barras/:barcode')
   @ApiOperation({ summary: 'Buscar un activo específico por su código de barras o QR' })
   findByBarcode(@Param('barcode') barcode: string) {
@@ -77,7 +142,7 @@ export class ActivosController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear un nuevo activo fijo individual' })
   @ApiResponse({ status: 201, description: 'Activo creado correctamente' })
@@ -87,7 +152,7 @@ export class ActivosController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar un activo fijo existente' })
   update(@Param('id') id: string, @Body() dto: UpdateActivoDto) {
@@ -96,7 +161,7 @@ export class ActivosController {
 
   @Post('ingreso')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Registrar Nota de Ingreso y generación masiva de activos con códigos de barra' })
   @ApiResponse({ status: 201, description: 'Nota de ingreso y activos creados exitosamente' })
@@ -106,7 +171,7 @@ export class ActivosController {
 
   @Post('acta')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.AUXILIAR_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generar Acta oficial (Entrega, Devolución, Transferencia) y actualizar custodia' })
   @ApiResponse({ status: 201, description: 'Acta generada y custodias actualizadas exitosamente' })

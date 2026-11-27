@@ -59,4 +59,41 @@ export class EntidadesService {
   eliminarInstitucion(id: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/instituciones/${id}`);
   }
+
+  // --- Organigrama Propio y Absorción del Ecosistema ---
+
+  listarUnidades(edificioId?: string): Observable<any[]> {
+    const query = edificioId ? `?edificioId=${edificioId}` : '';
+    return this.http.get<any[]>(`${this.baseUrl}/organigrama/unidades${query}`);
+  }
+
+  crearUnidad(dto: {
+    codigo?: number;
+    nombre: string;
+    sigla?: string;
+    edificioId: string;
+    unidadPadreId?: string | null;
+  }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/organigrama/unidades`, dto);
+  }
+
+  actualizarUnidad(
+    id: string,
+    dto: { nombre?: string; sigla?: string; edificioId?: string; unidadPadreId?: string | null },
+  ): Observable<any> {
+    return this.http.put(`${this.baseUrl}/organigrama/unidades/${id}`, dto);
+  }
+
+  eliminarUnidad(id: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/organigrama/unidades/${id}`);
+  }
+
+  importarOrganigrama(dto: {
+    edificioId: string;
+    origenUrl?: string;
+    tokenBearer?: string;
+    unidades?: any[];
+  }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/organigrama/importar`, dto);
+  }
 }

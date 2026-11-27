@@ -25,7 +25,7 @@ export class EntidadesController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Registrar una nueva entidad institucional' })
   crearEntidad(
@@ -42,7 +42,7 @@ export class EntidadesController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar datos de una entidad institucional' })
   actualizarEntidad(
@@ -67,7 +67,7 @@ export class EntidadesController {
 
   @Post(':id/instituciones')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Registrar una nueva institución/edificio hijo bajo una entidad' })
   crearInstitucion(
@@ -83,7 +83,7 @@ export class EntidadesController {
 
   @Put('instituciones/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar institución / edificio hijo' })
   actualizarInstitucion(
@@ -98,10 +98,88 @@ export class EntidadesController {
 
   @Delete('instituciones/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar una institución si no tiene almacenes o unidades activas' })
   eliminarInstitucion(@Param('id') id: string) {
     return this.entidadesService.eliminarInstitucion(id);
+  }
+
+  // --- Endpoints de Organigrama Propio (Unidades y Subunidades) y Absorción del Ecosistema ---
+
+  @Get('organigrama/unidades')
+  @ApiOperation({ summary: 'Listar todas las unidades del organigrama institucional' })
+  listarUnidades(@Query('edificioId') edificioId?: string) {
+    return this.entidadesService.listarUnidades(edificioId);
+  }
+
+  @Post('organigrama/unidades')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear una unidad o subunidad en el organigrama propio' })
+  crearUnidad(
+    @Body()
+    dto: {
+      codigo?: number;
+      nombre: string;
+      sigla?: string;
+      edificioId: string;
+      unidadPadreId?: string | null;
+    },
+  ) {
+    return this.entidadesService.crearUnidad(dto);
+  }
+
+  @Put('organigrama/unidades/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar unidad del organigrama' })
+  actualizarUnidad(
+    @Param('id') id: string,
+    @Body()
+    dto: {
+      nombre?: string;
+      sigla?: string;
+      edificioId?: string;
+      unidadPadreId?: string | null;
+    },
+  ) {
+    return this.entidadesService.actualizarUnidad(id, dto);
+  }
+
+  @Delete('organigrama/unidades/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar unidad del organigrama si no tiene dependencias' })
+  eliminarUnidad(@Param('id') id: string) {
+    return this.entidadesService.eliminarUnidad(id);
+  }
+
+  @Post('organigrama/importar')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Absorber organigrama desde Plantillas u otro sistema del ecosistema (URL o JSON)' })
+  importarOrganigrama(
+    @Body()
+    dto: {
+      edificioId: string;
+      origenUrl?: string;
+      tokenBearer?: string;
+      unidades?: Array<{
+        codigo?: number;
+        id_unidad?: number;
+        nombre: string;
+        sigla?: string;
+        abreviacion?: string;
+        codigoPadre?: number | null;
+        padre?: number | null;
+      }>;
+    },
+  ) {
+    return this.entidadesService.importarOrganigramaEcosistema(dto);
   }
 }

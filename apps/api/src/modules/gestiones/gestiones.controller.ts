@@ -2,10 +2,14 @@ import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards, Request } 
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { GestionesService, RegistrarUfvDto } from './gestiones.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolUsuario } from '@prisma/client';
 
 @ApiTags('Gestiones Fiscales y UFVs')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS)
 @Controller('gestiones')
 export class GestionesController {
   constructor(private readonly gestionesService: GestionesService) {}

@@ -120,4 +120,36 @@ export class AlmacenesClientService {
     const query = almacenId ? `?almacenId=${almacenId}` : '';
     return this.http.get(`/api/v1/pdf/kardex/${subarticuloId}${query}`, { responseType: 'blob' });
   }
+
+  descargarInventarioValoradoPdf(): Observable<Blob> {
+    return this.http.get('/api/v1/pdf/almacenes/inventario-valorado', { responseType: 'blob' });
+  }
+
+  listarMateriales(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/materiales`);
+  }
+
+  crearMaterial(dto: { codigo: string; descripcion: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/materiales`, dto);
+  }
+
+  crearSubarticulo(dto: { codigo: number; descripcion: string; unidadMedida: string; materialId: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/subarticulos`, dto);
+  }
+
+  listarIngresos(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ingresos`);
+  }
+
+  listarSolicitudes(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/solicitudes`);
+  }
+
+  entregarSolicitud(id: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/solicitudes/${id}/entregar`, {});
+  }
+
+  rechazarSolicitud(id: string, motivo?: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/solicitudes/${id}/rechazar`, { motivo });
+  }
 }

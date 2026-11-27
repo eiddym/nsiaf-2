@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Patch, Body, Get, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService, AuthentikSsoDto } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -48,5 +48,16 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Datos del perfil actual' })
   getProfile(@CurrentUser() user: any) {
     return user;
+  }
+
+  @Patch('cambiar-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cambiar contraseña del usuario autenticado' })
+  cambiarPassword(
+    @CurrentUser() user: any,
+    @Body() body: { passwordActual: string; passwordNueva: string },
+  ) {
+    return this.authService.cambiarPassword(user.id, body.passwordActual, body.passwordNueva);
   }
 }

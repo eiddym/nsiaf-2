@@ -90,4 +90,19 @@ export class PdfController {
 
     res.end(Buffer.from(pdfBytes));
   }
+
+  @Get('almacenes/inventario-valorado')
+  @ApiOperation({ summary: 'Descargar Reporte Oficial de Inventario Físico Valorado de Almacenes en PDF' })
+  @Header('Content-Type', 'application/pdf')
+  async descargarInventarioValoradoAlmacen(@Res() res: Response) {
+    const pdfBytes = await this.pdfService.generarInventarioValoradoAlmacenPdf();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="inventario-fisico-valorado-almacenes.pdf"',
+      'Content-Length': pdfBytes.length,
+    });
+
+    res.end(Buffer.from(pdfBytes));
+  }
 }

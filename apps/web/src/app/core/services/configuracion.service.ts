@@ -35,4 +35,8 @@ export class ConfiguracionService {
   updateConfiguracion(data: Partial<ConfiguracionSistemaData> & { auxiliaresActivosIds?: string[]; auxiliaresAlmacenesIds?: string[] }): Observable<ConfiguracionSistemaData> {
     return this.http.put<ConfiguracionSistemaData>('/api/v1/configuracion', data);
   }
+
+  cargarClasificadores2027(): Observable<any> {
+    return this.http.post('/api/v1/configuracion/cargar-clasificadores-2027', {});
+  }
 }

@@ -81,6 +81,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/configuracion/configuracion.component').then((m) => m.ConfiguracionComponent),
       },
+      {
+        path: 'usuarios',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/usuarios/usuarios.component').then((m) => m.UsuariosComponent),
+      },
+      {
+        path: 'auditoria',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/auditoria/auditoria.component').then((m) => m.AuditoriaComponent),
+      },
     ],
   },
   {

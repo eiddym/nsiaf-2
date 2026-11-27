@@ -12,6 +12,7 @@ import { ActivosService } from '../../core/services/activos.service';
 import { ActivoFijo, ActivosEstadisticas } from '../../core/models/activo.models';
 import { ProveedoresService, Proveedor } from '../../core/services/proveedores.service';
 import { VisorPdfDialogComponent } from '../../shared/components/visor-pdf/visor-pdf-dialog.component';
+import { ActivosOperacionesPanelComponent } from './activos-operaciones-panel.component';
 import jsQR from 'jsqr';
 
 @Component({
@@ -27,6 +28,7 @@ import jsQR from 'jsqr';
     MatChipsModule,
     MatTooltipModule,
     MatDialogModule,
+    ActivosOperacionesPanelComponent,
   ],
   template: `
     <div class="activos-container">
@@ -961,6 +963,9 @@ import jsQR from 'jsqr';
           </div>
         </div>
       }
+
+      <!-- Panel Operativo Integral: Solicitudes, Actas, Bajas y Rubros Grupo 40000 -->
+      <app-activos-operaciones-panel (datosActualizados)="cargarActivos()"></app-activos-operaciones-panel>
     </div>
   `,
   styles: [`

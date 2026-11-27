@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfiguracionService, UpdateConfiguracionDto } from './configuracion.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -26,5 +26,12 @@ export class ConfiguracionController {
   @ApiOperation({ summary: 'Actualizar parámetros iniciales, responsables y modo unificado/descentralizado' })
   updateConfiguracion(@Body() dto: UpdateConfiguracionDto) {
     return this.configuracionService.updateConfiguracion(dto);
+  }
+
+  @Post('cargar-clasificadores-2027')
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL)
+  @ApiOperation({ summary: 'Sincronizar Clasificadores Presupuestarios Gestión 2027 (MEFP RM Nº 271): Grupo 30000 y Grupo 40000' })
+  cargarClasificadores2027() {
+    return this.configuracionService.cargarClasificadores2027();
   }
 }

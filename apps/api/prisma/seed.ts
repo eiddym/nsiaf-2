@@ -1,5 +1,20 @@
 import { PrismaClient, RolUsuario, EstadoActivo, TipoIngreso } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const clasificador2027 = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), 'prisma', 'clasificadores-2027.json'), 'utf8'),
+);
+const CLASIFICADOR_MATERIALES_2027: Array<{ codigo: string; descripcion: string }> = clasificador2027.materiales;
+const CLASIFICADOR_ACTIVOS_2027: Array<{
+  codigo: number;
+  nombre: string;
+  vidaUtilMeses: number;
+  depreciar: boolean;
+  actualizar: boolean;
+  auxiliares: Array<{ codigo: number; nombre: string }>;
+}> = clasificador2027.activos;
 
 const prisma = new PrismaClient();
 
@@ -539,7 +554,54 @@ async function main() {
     },
   });
 
+  // 9. Clasificadores Presupuestarios Oficiales Gestión 2027 (MEFP - RM Nº 271)
+  for (const mat of CLASIFICADOR_MATERIALES_2027) {
+    await prisma.material.upsert({
+      where: { codigo: mat.codigo },
+      update: { descripcion: mat.descripcion },
+      create: { codigo: mat.codigo, descripcion: mat.descripcion, activo: true },
+    });
+  }
+
+  for (const cta of CLASIFICADOR_ACTIVOS_2027) {
+    const cuenta = await prisma.cuentaContable.upsert({
+      where: { codigo: cta.codigo },
+      update: {
+        nombre: cta.nombre,
+        vidaUtilMeses: cta.vidaUtilMeses,
+        depreciar: cta.depreciar,
+        actualizar: cta.actualizar,
+      },
+      create: {
+        codigo: cta.codigo,
+        nombre: cta.nombre,
+        vidaUtilMeses: cta.vidaUtilMeses,
+        depreciar: cta.depreciar,
+        actualizar: cta.actualizar,
+        activo: true,
+      },
+    });
+    for (const aux of cta.auxiliares) {
+      await prisma.auxiliar.upsert({
+        where: {
+          cuentaContableId_codigo: {
+            cuentaContableId: cuenta.id,
+            codigo: aux.codigo,
+          },
+        },
+        update: { nombre: aux.nombre },
+        create: {
+          cuentaContableId: cuenta.id,
+          codigo: aux.codigo,
+          nombre: aux.nombre,
+          activo: true,
+        },
+      });
+    }
+  }
+
   console.log('✅ Seed completado con éxito:');
+  console.log(` - Clasificador Presupuestario 2027: ${CLASIFICADOR_MATERIALES_2027.length} partidas 30000, ${CLASIFICADOR_ACTIVOS_2027.length} cuentas 40000`);
   console.log(` - Entidad: ${entidad.nombre}`);
   console.log(` - Almacén Central: ${almCentral.nombre}`);
   console.log(` - Sub-almacén Sucursal: ${subAlmElAlto.nombre} (Hijo dependiente)`);

@@ -1,0 +1,387 @@
+{
+  "materiales": [
+    {
+      "codigo": "31100",
+      "descripcion": "Alimentos y Bebidas para Personas, Desayuno Escolar y Otros"
+    },
+    {
+      "codigo": "31110",
+      "descripcion": "Gastos por Refrigerios al Personal Permanente, Eventual y Consultores"
+    },
+    {
+      "codigo": "31200",
+      "descripcion": "Alimentos para Animales"
+    },
+    {
+      "codigo": "31300",
+      "descripcion": "Productos Agrícolas, Pecuarios y Forestales"
+    },
+    {
+      "codigo": "32100",
+      "descripcion": "Papel"
+    },
+    {
+      "codigo": "32200",
+      "descripcion": "Productos de Artes Gráficas"
+    },
+    {
+      "codigo": "32300",
+      "descripcion": "Libros, Manuales y Revistas"
+    },
+    {
+      "codigo": "32400",
+      "descripcion": "Textos de Enseñanza"
+    },
+    {
+      "codigo": "32500",
+      "descripcion": "Periódicos y Boletines"
+    },
+    {
+      "codigo": "33100",
+      "descripcion": "Hilados, Telas, Fibras y Algodón"
+    },
+    {
+      "codigo": "33200",
+      "descripcion": "Confecciones Textiles"
+    },
+    {
+      "codigo": "33300",
+      "descripcion": "Prendas de Vestir"
+    },
+    {
+      "codigo": "33400",
+      "descripcion": "Calzados"
+    },
+    {
+      "codigo": "34110",
+      "descripcion": "Combustibles, Lubricantes y Derivados para Consumo"
+    },
+    {
+      "codigo": "34200",
+      "descripcion": "Productos Químicos y Farmacéuticos"
+    },
+    {
+      "codigo": "34300",
+      "descripcion": "Llantas y Neumáticos"
+    },
+    {
+      "codigo": "34400",
+      "descripcion": "Productos de Cuero y Caucho"
+    },
+    {
+      "codigo": "34500",
+      "descripcion": "Productos de Minerales no Metálicos y Plásticos"
+    },
+    {
+      "codigo": "34600",
+      "descripcion": "Productos Metálicos"
+    },
+    {
+      "codigo": "34700",
+      "descripcion": "Minerales"
+    },
+    {
+      "codigo": "34800",
+      "descripcion": "Herramientas Menores"
+    },
+    {
+      "codigo": "39100",
+      "descripcion": "Material de Limpieza e Higiene"
+    },
+    {
+      "codigo": "39200",
+      "descripcion": "Material Deportivo y Recreativo"
+    },
+    {
+      "codigo": "39300",
+      "descripcion": "Utensilios de Cocina y Comedor"
+    },
+    {
+      "codigo": "39400",
+      "descripcion": "Instrumental Menor Médico-Quirúrgico"
+    },
+    {
+      "codigo": "39500",
+      "descripcion": "Útiles de Escritorio y Oficina"
+    },
+    {
+      "codigo": "39600",
+      "descripcion": "Útiles Educacionales, Culturales y de Capacitación"
+    },
+    {
+      "codigo": "39700",
+      "descripcion": "Útiles y Materiales Eléctricos"
+    },
+    {
+      "codigo": "39800",
+      "descripcion": "Otros Repuestos y Accesorios"
+    },
+    {
+      "codigo": "39990",
+      "descripcion": "Otros Materiales y Suministros"
+    }
+  ],
+  "activos": [
+    {
+      "codigo": 41100,
+      "nombre": "Edificios",
+      "vidaUtilMeses": 480,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Edificio Administrativo"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Infraestructura y Galpones"
+        }
+      ]
+    },
+    {
+      "codigo": 41200,
+      "nombre": "Tierras y Terrenos",
+      "vidaUtilMeses": 0,
+      "depreciar": false,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Terrenos Urbanos"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Terrenos Rurales / Predios"
+        }
+      ]
+    },
+    {
+      "codigo": 43110,
+      "nombre": "Equipo de Oficina y Muebles",
+      "vidaUtilMeses": 120,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Escritorios y Mesas de Trabajo"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Sillas y Sillones Ejecutivos"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Estantes, Credenzas y Gaveteros"
+        },
+        {
+          "codigo": 4,
+          "nombre": "Equipos de Climatización y Oficina"
+        }
+      ]
+    },
+    {
+      "codigo": 43120,
+      "nombre": "Equipo de Computación",
+      "vidaUtilMeses": 48,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Computadoras Portátiles (Laptops)"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Computadoras de Escritorio (PC)"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Servidores y Almacenamiento"
+        },
+        {
+          "codigo": 4,
+          "nombre": "Impresoras, Escáneres y Periféricos"
+        },
+        {
+          "codigo": 5,
+          "nombre": "Equipos de Red, Switches y Routers"
+        }
+      ]
+    },
+    {
+      "codigo": 43200,
+      "nombre": "Maquinaria y Equipo de Producción",
+      "vidaUtilMeses": 96,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Maquinaria Industrial y Pesada"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Generadores y Grupos Electrógenos"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Herramientas Eléctricas de Taller"
+        }
+      ]
+    },
+    {
+      "codigo": 43310,
+      "nombre": "Vehículos Livianos para Funciones Administrativas",
+      "vidaUtilMeses": 60,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Automóviles y Vagonetas"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Camionetas 4x4"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Motocicletas y Cuadratracks"
+        }
+      ]
+    },
+    {
+      "codigo": 43330,
+      "nombre": "Maquinaria y Equipo de Transporte",
+      "vidaUtilMeses": 60,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Camiones y Volquetas"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Tractores y Maquinaria Móvil"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Remolques y Semirremolques"
+        }
+      ]
+    },
+    {
+      "codigo": 43340,
+      "nombre": "Equipo de Elevación",
+      "vidaUtilMeses": 96,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Montacargas y Grúas"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Tecles y Plataformas Elevadoras"
+        }
+      ]
+    },
+    {
+      "codigo": 43400,
+      "nombre": "Equipo Médico y de Laboratorio",
+      "vidaUtilMeses": 96,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Instrumental y Equipos de Laboratorio"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Equipos de Medición y Calibración"
+        }
+      ]
+    },
+    {
+      "codigo": 43500,
+      "nombre": "Equipo de Comunicación",
+      "vidaUtilMeses": 96,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Radios Base y Portátiles (VHF/UHF)"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Centrales Telefónicas y Teléfonos IP"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Antenas, Torres y Enlaces"
+        }
+      ]
+    },
+    {
+      "codigo": 43600,
+      "nombre": "Equipo Educacional y Recreativo",
+      "vidaUtilMeses": 96,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Proyectores y Pantallas Interactivas"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Equipos de Sonido y Audiovisual"
+        }
+      ]
+    },
+    {
+      "codigo": 43700,
+      "nombre": "Otra Maquinaria y Equipo",
+      "vidaUtilMeses": 96,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Cámaras de Seguridad y CCTV"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Equipos de Seguridad Industrial"
+        },
+        {
+          "codigo": 3,
+          "nombre": "Otros Equipos Operativos"
+        }
+      ]
+    },
+    {
+      "codigo": 49100,
+      "nombre": "Activos Intangibles",
+      "vidaUtilMeses": 60,
+      "depreciar": true,
+      "actualizar": true,
+      "auxiliares": [
+        {
+          "codigo": 1,
+          "nombre": "Licencias de Software y Sistemas"
+        },
+        {
+          "codigo": 2,
+          "nombre": "Derechos y Patentes"
+        }
+      ]
+    }
+  ]
+}

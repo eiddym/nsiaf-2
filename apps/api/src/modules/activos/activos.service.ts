@@ -592,4 +592,172 @@ export class ActivosService {
       },
     };
   }
+
+  // ==========================================
+  // CUENTAS CONTABLES Y AUXILIARES (GRUPO 40000)
+  // ==========================================
+
+  async listarCuentasContables() {
+    return this.prisma.cuentaContable.findMany({
+      include: {
+        auxiliares: { orderBy: { codigo: 'asc' } },
+        _count: { select: { activos: true } },
+      },
+      orderBy: { codigo: 'asc' },
+    });
+  }
+
+  async crearCuentaContable(dto: {
+    codigo: number;
+    nombre: string;
+    vidaUtilMeses: number;
+    depreciar?: boolean;
+    actualizar?: boolean;
+  }) {
+    const dup = await this.prisma.cuentaContable.findUnique({ where: { codigo: Number(dto.codigo) } });
+    if (dup) throw new BadRequestException(`Ya existe la cuenta contable con código ${dto.codigo}`);
+
+    return this.prisma.cuentaContable.create({
+      data: {
+        codigo: Number(dto.codigo),
+        nombre: dto.nombre.trim(),
+        vidaUtilMeses: Number(dto.vidaUtilMeses) || 0,
+        depreciar: dto.depreciar ?? true,
+        actualizar: dto.actualizar ?? true,
+      },
+      include: { auxiliares: true },
+    });
+  }
+
+  async crearAuxiliar(cuentaContableId: string, dto: { codigo: number; nombre: string }) {
+    const cuenta = await this.prisma.cuentaContable.findUnique({ where: { id: cuentaContableId } });
+    if (!cuenta) throw new NotFoundException('Cuenta contable no encontrada');
+
+    return this.prisma.auxiliar.create({
+      data: {
+        cuentaContableId,
+        codigo: Number(dto.codigo),
+        nombre: dto.nombre.trim(),
+      },
+    });
+  }
+
+  // ==========================================
+  // BAJAS DE ACTIVOS FIJOS
+  // ==========================================
+
+  async listarBajas() {
+    return this.prisma.bajaActivo.findMany({
+      include: {
+        usuario: { select: { id: true, nombres: true, apellidos: true, username: true } },
+        activosDadosDeBaja: {
+          include: { cuentaContable: true },
+        },
+      },
+      orderBy: { fecha: 'desc' },
+    });
+  }
+
+  async registrarBaja(
+    dto: {
+      activoIds: string[];
+      motivo: string;
+      documentoCite?: string;
+      observacion?: string;
+      fecha?: string;
+    },
+    userId: string,
+  ) {
+    if (!dto.activoIds || dto.activoIds.length === 0) {
+      throw new BadRequestException('Debe seleccionar al menos un activo para dar de baja.');
+    }
+    if (!dto.motivo?.trim()) {
+      throw new BadRequestException('El motivo de baja es obligatorio.');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const baja = await tx.bajaActivo.create({
+        data: {
+          fecha: dto.fecha ? new Date(dto.fecha) : new Date(),
+          motivo: dto.motivo.trim(),
+          documentoCite: dto.documentoCite?.trim() || null,
+          observacion: dto.observacion?.trim() || null,
+          usuarioId: userId,
+        },
+      });
+
+      await tx.activo.updateMany({
+        where: { id: { in: dto.activoIds } },
+        data: {
+          bajaId: baja.id,
+          usuarioCustodioId: null,
+        },
+      });
+
+      await tx.auditoria.create({
+        data: {
+          tabla: 'bajas_activos',
+          registroId: baja.id,
+          accion: 'CREATE',
+          datosNuevos: { motivo: baja.motivo, activos: dto.activoIds, documentoCite: baja.documentoCite } as any,
+          usuarioId: userId,
+        },
+      });
+
+      return tx.bajaActivo.findUnique({
+        where: { id: baja.id },
+        include: {
+          usuario: { select: { id: true, nombres: true, apellidos: true } },
+          activosDadosDeBaja: true,
+        },
+      });
+    });
+  }
+
+  // ==========================================
+  // BANDEJA DE SOLICITUDES DE ACTIVOS (DE FUNCIONARIOS)
+  // ==========================================
+
+  async listarSolicitudesActivos(estado?: string) {
+    return this.prisma.solicitudActivo.findMany({
+      where: estado ? { estado: estado as any } : {},
+      include: {
+        solicitante: {
+          select: {
+            id: true,
+            ci: true,
+            nombres: true,
+            apellidos: true,
+            cargo: true,
+            unidad: { select: { nombre: true, sigla: true } },
+          },
+        },
+        activo: {
+          select: { id: true, codigoBarras: true, descripcion: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async actualizarEstadoSolicitudActivo(
+    id: string,
+    estado: 'APROBADA' | 'ENTREGADA' | 'RECHAZADA' | 'ANULADA',
+    observacion?: string,
+  ) {
+    const sol = await this.prisma.solicitudActivo.findUnique({ where: { id } });
+    if (!sol) throw new NotFoundException('Solicitud de activo no encontrada');
+
+    return this.prisma.solicitudActivo.update({
+      where: { id },
+      data: {
+        estado: estado as any,
+        ...(observacion !== undefined ? { observacion } : {}),
+      },
+      include: {
+        solicitante: { select: { id: true, nombres: true, apellidos: true } },
+        activo: { select: { id: true, codigoBarras: true, descripcion: true } },
+      },
+    });
+  }
 }

@@ -36,7 +36,7 @@ export class ProveedoresController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS, RolUsuario.ADMIN_ALMACENES)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.ADMIN_ALMACENES)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Registrar un nuevo proveedor' })
   crearProveedor(
@@ -53,7 +53,7 @@ export class ProveedoresController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS, RolUsuario.ADMIN_ALMACENES)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.ADMIN_ALMACENES)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar datos de un proveedor' })
   actualizarProveedor(
@@ -71,7 +71,7 @@ export class ProveedoresController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_ACTIVOS, RolUsuario.ADMIN_ALMACENES)
+  @Roles(RolUsuario.SUPER_ADMIN, RolUsuario.ADMIN_GENERAL, RolUsuario.ADMIN_ACTIVOS, RolUsuario.ADMIN_ALMACENES)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar proveedor si no tiene ingresos vinculados' })
   eliminarProveedor(@Param('id') id: string) {

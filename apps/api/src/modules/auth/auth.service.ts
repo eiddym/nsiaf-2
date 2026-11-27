@@ -231,4 +231,28 @@ export class AuthService {
     const { passwordHash: _, ...result } = user;
     return result;
   }
+
+  async cambiarPassword(userId: string, passwordActual: string, passwordNueva: string) {
+    if (!passwordNueva || passwordNueva.length < 6) {
+      throw new BadRequestException('La nueva contraseña debe tener al menos 6 caracteres.');
+    }
+
+    const user = await this.prisma.usuario.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado.');
+    }
+
+    const valid = await bcrypt.compare(passwordActual, user.passwordHash);
+    if (!valid) {
+      throw new BadRequestException('La contraseña actual es incorrecta.');
+    }
+
+    const passwordHash = await bcrypt.hash(passwordNueva, 10);
+    await this.prisma.usuario.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    return { ok: true, mensaje: 'Contraseña actualizada correctamente.' };
+  }
 }
